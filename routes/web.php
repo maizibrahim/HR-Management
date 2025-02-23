@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Employee\CountryController;
 use App\Http\Controllers\Employee\LeaveController;
 use App\Http\Controllers\Employee\SalaryController;
+use App\Http\Controllers\Employee\SupervisorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
@@ -45,6 +46,13 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/user/change/password', 'ChangePassword')->name('change.password');
     Route::post('/user/store/password', 'UpdatePassword')->name('update.password');
 
+});
+//Supervisor Route
+Route::controller(SupervisorController::class)->group(function () {
+    Route::get('/employee/supervisor/all', 'AllSupervisor')->name('supervisor.all');
+    Route::get('/employee/supervisor/new', 'AddSupervisor')->name('supervisor.add');
+    Route::post('/employee/supervisor/store', 'StoreSupervisor')->name('supervisor.store');
+    Route::get('/employee/supervisor/delete/{id}','DeleteSupervisor')->name('supervisor.delete');
 });
 
 //Permission All route
@@ -144,6 +152,23 @@ Route::controller(LeaveController::class)->group(function () {
     Route::get('/edit/leave/type/{id}', 'EditLeaveType')->name('leave.type.edit');
     Route::post('/update/leave/type/{id}', 'UpdateLeaveType')->name('leave.type.update');
     Route::get('/delete/leave/type/{id}','DeleteLeaveType')->name('leave.type.delete');
+
+    //Leave group All route
+   Route::get('/leave/group/all', 'AllLeaveGroup')->name('leave.group.all');
+   Route::get('/leave/group/new', 'AddLeaveGroup')->name('leave.group.add');
+   Route::post('/leave/group/store', 'StoreLeaveGroup')->name('leave.group.store');
+   Route::get('/leave/group/edit/{id}', 'EditLeaveGroup')->name('leave.group.edit');
+   Route::post('/leave/group/update/{id}', 'UpdateLeaveGroup')->name('leave.group.update');
+   Route::get('/leave/group/delete/{id}','DeleteLeaveGroup')->name('leave.group.delete');
+    Route::get('/leave/group/allocation/{id}','DetailLeaveGroup')->name('leave.group.detail');
+
+    //Leave Allocation All route
+    Route::get('/employee/leave/group/allocation/all', 'AllLeaveAllocation')->name('leave.allocation.all');
+    Route::get('/employee/leave/group/allocation/{id}/new', 'AddLeaveAllocation')->name('leave.allocation.add');
+    Route::post('/employee/leave/group/allocation/{id}/store', 'StoreLeaveAllocation')->name('leave.allocation.store');
+   // Route::get('/leave/group/edit/{id}', 'EditLeaveGroup')->name('leave.group.edit');
+  //  Route::post('/leave/group/update/{id}', 'UpdateLeaveGroup')->name('leave.group.update');
+  //  Route::get('/leave/group/delete/{id}','DeleteLeaveGroup')->name('leave.group.delete');
 
 
 

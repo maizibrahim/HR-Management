@@ -31,12 +31,14 @@
 
             <li class="menu-label">Employee Management</li>
 
-            <li>
-                <a href="{{route('employee.all')}}">
+            <li><a class="has-arrow">
                     <div class="parent-icon"><i class='bx bx-group'></i>
-                    </div>
-                    <div class="menu-title">Employee</div>
+                    </div><div class="menu-title">Employee</div>
                 </a>
+                <ul>
+                    <li> <a href="{{route('employee.all')}}"><i class='bx bx-radio-circle'></i>Registration</a></li>
+                    <li> <a href="{{route('supervisor.all')}}"><i class='bx bx-radio-circle'></i>Supervisor</a></li>
+                </ul>
             </li>
             <li>
                 <a href="{{route('salary.all')}}">
@@ -45,13 +47,16 @@
                     <div class="menu-title">Salary</div>
                 </a>
             </li>
-            <li>
-                <a href="">
-                    <div class="parent-icon"><i class='bx bxs-ambulance'></i>
-                    </div>
+
+            <li> <a  href="{{route('leave.group.all')}}">
+                    <div class="parent-icon"><i class='bx bxs-ambulance'></i></div>
                     <div class="menu-title">Leave</div>
                 </a>
             </li>
+
+
+
+
 
 
             <li class="menu-label">Leave Management</li>
@@ -92,7 +97,7 @@
                 </a>
                 <ul>
                     <li> <a href="{{route('leave.type.all')}}"><i class='bx bx-radio-circle'></i>Leave Type</a></li>
-                    <li> <a href=""><i class='bx bx-radio-circle'></i>Leave Group</a></li>
+                    <li> <a href="{{route('leave.group.all')}}"><i class='bx bx-radio-circle'></i>Leave Group</a></li>
                 </ul>
             </li>
 

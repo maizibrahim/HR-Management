@@ -67,6 +67,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $permissions;
     }
 
+
+
     public static function roleHasPermissions($role, $permissions)
     {
         $hasPermission = true;

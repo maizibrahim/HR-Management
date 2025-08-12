@@ -29,6 +29,8 @@ return new class extends Migration
             $table->string('caddress')->nullable();
             $table->string('code')->nullable();
             $table->string('id_no')->nullable();
+            $table->foreignId('leave_group_id')->nullable()->constrained();
+            $table->foreignId('supervisor_id')->nullable()->references('id')->on('users');
             $table->date('join_date')->nullable();
             $table->bigInteger('classification_id')->nullable();
             $table->bigInteger('rank_id')->nullable();
@@ -59,7 +61,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['leave_group_id']);
+            $table->dropForeign(['supervisor_id']);
+            $table->dropColumn(['leave_group_id', 'supervisor_id', 'join_date']);
+        });
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }

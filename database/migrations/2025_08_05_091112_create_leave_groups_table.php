@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('leave_groups', function (Blueprint $table) {
             $table->id();
-            $table->string('leave_group');
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

@@ -15,10 +15,18 @@ use App\Http\Controllers\Employee\DesignationController;
 use App\Http\Controllers\Employee\EmployeeRegController;
 
 
+use App\Http\Controllers\Leave\LeaveGroupController;
+use App\Http\Controllers\Leave\LeaveTypeController;
+use App\Http\Controllers\Leave\LeaveRequestController;
+use App\Http\Controllers\Leave\UserLeaveController;
+
+
 Route::get('/', function () {
     return view('/auth/login');
 
-});
+    });
+
+
 
 Route::get('/dashboard', function () {
     return view('admin.index');
@@ -143,40 +151,44 @@ Route::controller(SalaryController::class)->group(function () {
     Route::get('/delete/employee/salary/{id}','DeleteSalary')->name('salary.delete');
  });
 
-//Employee Leave All route
-Route::controller(LeaveController::class)->group(function () {
-    //Leave Type All route
-    Route::get('/all/leave/type', 'AllLeaveType')->name('leave.type.all');
-    Route::get('/new/leave/type', 'AddLeaveType')->name('leave.type.add');
-    Route::post('/store/leave/type', 'StoreLeaveType')->name('leave.type.store');
-    Route::get('/edit/leave/type/{id}', 'EditLeaveType')->name('leave.type.edit');
-    Route::post('/update/leave/type/{id}', 'UpdateLeaveType')->name('leave.type.update');
-    Route::get('/delete/leave/type/{id}','DeleteLeaveType')->name('leave.type.delete');
+// User Management Routes
+    Route::resource('users', EmployeeRegController::class);
+    Route::get('/users/{user}/assign-supervisor', [EmployeeRegController::class, 'assignSupervisor'])->name('users.assign-supervisor');
+    Route::patch('/users/{user}/update-supervisor', [EmployeeRegController::class, 'updateSupervisor'])->name('users.update-supervisor');
+    Route::get('/users/{user}/assign-leave-group', [EmployeeRegController::class, 'assignLeaveGroup'])->name('users.assign-leave-group');
+    Route::post('/users/bulk-assign-supervisor', [EmployeeRegController::class, 'bulkAssignSupervisor'])->name('users.bulk-assign-supervisor');
 
-    //Leave group All route
-   Route::get('/leave/group/all', 'AllLeaveGroup')->name('leave.group.all');
-   Route::get('/leave/group/new', 'AddLeaveGroup')->name('leave.group.add');
-   Route::post('/leave/group/store', 'StoreLeaveGroup')->name('leave.group.store');
-   Route::get('/leave/group/edit/{id}', 'EditLeaveGroup')->name('leave.group.edit');
-   Route::post('/leave/group/update/{id}', 'UpdateLeaveGroup')->name('leave.group.update');
-   Route::get('/leave/group/delete/{id}','DeleteLeaveGroup')->name('leave.group.delete');
-    Route::get('/leave/group/allocation/{id}','DetailLeaveGroup')->name('leave.group.detail');
-
-    //Leave Allocation All route
-    Route::get('/employee/leave/group/allocation/all', 'AllLeaveAllocation')->name('leave.allocation.all');
-    Route::get('/employee/leave/group/allocation/{id}/new', 'AddLeaveAllocation')->name('leave.allocation.add');
-    Route::post('/employee/leave/group/allocation/{id}/store', 'StoreLeaveAllocation')->name('leave.allocation.store');
-   // Route::get('/leave/group/edit/{id}', 'EditLeaveGroup')->name('leave.group.edit');
-  //  Route::post('/leave/group/update/{id}', 'UpdateLeaveGroup')->name('leave.group.update');
-  //  Route::get('/leave/group/delete/{id}','DeleteLeaveGroup')->name('leave.group.delete');
+    // Supervisor Management
+    Route::get('/supervisor-management', function() {
+        $users = \App\Models\User::with(['leaveGroup', 'supervisor', 'subordinates'])->orderBy('name')->get();
+        return view('users.supervisor-management', compact('users'));
+    })->name('supervisor-management');
 
 
 
+// Leave Groups Routes
+Route::resource('leave-groups', LeaveGroupController::class);
 
-});
+// Leave Types Routes
+Route::resource('leave-types', LeaveTypeController::class);
+
+// Leave Requests
+    Route::get('/leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
+    Route::get('/leave-requests/create', [LeaveRequestController::class, 'create'])->name('leave-requests.create');
+    Route::post('/leave-requests', [LeaveRequestController::class, 'store'])->name('leave-requests.store');
+    Route::get('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave-requests.show');
+    Route::delete('/leave-requests/{leaveRequest}/cancel', [LeaveRequestController::class, 'cancel'])->name('leave-requests.cancel');
+
+ // Leave Approvals
+    Route::get('/leave-approvals', [LeaveRequestController::class, 'approvalList'])->name('leave-requests.approval-list');
+    Route::patch('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave-requests.approve');
+    Route::patch('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave-requests.reject');
 
 
-
+// User Leave Management
+    Route::patch('/users/{user}/leave-group', [UserLeaveController::class, 'assignLeaveGroup'])->name('users.assign-leave-group');
+    Route::get('/users/{user}/leave-balances', [UserLeaveController::class, 'manageLeaveBalances'])->name('users.leave-balances');
+    Route::patch('/leave-balances/{leaveBalance}', [UserLeaveController::class, 'updateLeaveBalance'])->name('leave-balances.update');
 
 
 

@@ -27,7 +27,9 @@
 
 <!--Sweet alert JS-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+@stack('scripts')
 <script src="{{ asset('assets/js/code.js') }}"></script>
+
 
 
 <!--Password show & hide js -->

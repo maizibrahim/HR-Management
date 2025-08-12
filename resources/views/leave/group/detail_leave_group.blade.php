@@ -23,7 +23,13 @@
                 </div>s
             </div>
             <!--end breadcrumb-->
-            <a href="{{route('leave.allocation.add',$item->id)}}" type="button" class="btn btn-primary px-4 right">Add Allocation</a>
+
+
+            <a href="" type="button" class="btn btn-primary px-4 right">Add Allocation</a>
+ @foreach($leavegroup as $key => $item)
+             <h5 class="mb-0">Leave Group: {{$item->leavegroup_id == $leavegroup->id ? $leavegroup->name :''}}</h5>
+@endforeach
+
 
             <br><br><div class="card">
                 <div class="card-body" >

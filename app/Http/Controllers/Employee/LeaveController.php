@@ -114,7 +114,7 @@ class LeaveController extends Controller
 
     public function DetailLeaveGroup($id)
     {
-        $leavegroup = leave_group::findorFail($id);
+         $leavegroup = leave_group::findorFail($id);
         $leaveallocation  = leave_allocate::where('leavegroup_id',$id)->get();
         $group = leave_group::all();
         $leave =leave_allocate::all();
@@ -156,7 +156,8 @@ class LeaveController extends Controller
     public function AllLeaveAllocation()
     {
        $leaveallocation  = leave_allocate::all();
-        return view('leave.allocation.all_leave_allocation',compact('leaveallocation'));
+        $leavegroup = leave_group::all();
+        return view('leave.allocation.all_leave_allocation',compact('leaveallocation','leavegroup'));
 
     }
 
@@ -195,6 +196,91 @@ class LeaveController extends Controller
 
         return redirect()->route('leave.group.all')->with($notification);
 
+    }
+
+
+    //Show the manage leave types form for a specific leave group
+
+    public function manageLeaveTypes(Leave_group $leaveGroup)
+    {
+        // Get all available leave types
+        $allLeaveTypes = LeaveType::all();
+
+        // Get the current leave types for the group
+        $currentLeaveTypes = $leaveGroup->leaveTypes;
+
+        return view('leave.group.detail_leave_group', compact('AllLeaveGroup', 'AllLeaveType', 'currentLeaveTypes'));
+    }
+
+    /**
+     * Update the leave types for a leave group
+     */
+    public function updateLeaveTypes(Request $request, Leave_group $leaveGroup)
+    {
+        $validated = $request->validate([
+            'leave_type_ids' => 'nullable|array',
+            'leave_type_ids.*' => 'exists:leave_types,id',
+            'days_allowed' => 'required|array',
+            'days_allowed.*' => 'integer|min:1',
+            'requires_documentation' => 'nullable|array',
+            'requires_documentation.*' => 'boolean',
+        ]);
+
+        $leaveTypeIds = $validated['leave_type_ids'] ?? [];
+
+        // Start transaction
+        DB::beginTransaction();
+
+        try {
+            // Get all existing types to check for removed ones
+            $existingTypes = $leaveGroup->leaveTypes->pluck('id')->toArray();
+
+            // For each selected leave type
+            foreach ($leaveTypeIds as $leaveTypeId) {
+                $leaveType = LeaveType::findOrFail($leaveTypeId);
+
+                // If this leave type is not already in this group, move it
+                if ($leaveType->leave_group_id !== $leaveGroup->id) {
+                    $leaveType->update([
+                        'leave_group_id' => $leaveGroup->id,
+                        'days_allowed' => $validated['days_allowed'][$leaveTypeId],
+                        'requires_documentation' => isset($validated['requires_documentation'][$leaveTypeId]) ? 1 : 0,
+                    ]);
+                } else {
+                    // Just update the settings
+                    $leaveType->update([
+                        'days_allowed' => $validated['days_allowed'][$leaveTypeId],
+                        'requires_documentation' => isset($validated['requires_documentation'][$leaveTypeId]) ? 1 : 0,
+                    ]);
+                }
+            }
+
+            // For types that were in this group but not selected, they are being removed
+            $typesToRemove = array_diff($existingTypes, $leaveTypeIds);
+            if (!empty($typesToRemove)) {
+                // Create a default group for removed types if needed
+                $defaultGroup = Leave_group::firstOrCreate(
+                    ['name' => 'Unassigned'],
+                    ['description' => 'Default group for unassigned leave types']
+                );
+
+                // Move removed types to the default group
+                LeaveType::whereIn('id', $typesToRemove)
+                    ->update(['leave_group_id' => $defaultGroup->id]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('leave.group.detail', $leaveGroup)
+                ->with('success', 'Leave types updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return redirect()->back()
+                ->with('error', 'Failed to update leave types: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
 

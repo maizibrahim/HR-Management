@@ -13,10 +13,14 @@ return new class extends Migration
     {
         Schema::create('leave_types', function (Blueprint $table) {
             $table->id();
-            $table->string('leave_code')->unique();
-            $table->string('Leave_name')->unique();
-            $table->integer('leave_total')->nullable();
+            $table->foreignId('leave_group_id')->constrained()->onDelete('cascade');
+            $table->string('leave_code');
+            $table->string('leave_name');
+            $table->integer('days_allowed')->nullable();
+            $table->boolean('requires_documentation')->default(false);
             $table->timestamps();
+
+            $table->unique(['leave_group_id','leave_code']);
         });
     }
 

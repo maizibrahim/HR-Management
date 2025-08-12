@@ -5,22 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\designation\classification;
 use App\Models\designation\rank;
 use App\Models\User;
-use App\Models\LeaveGroup;
-use App\Models\LeaveType;
-use App\Models\LeaveBalance;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules;
-use Carbon\Carbon;
-
 
 class UserController extends Controller
 {
-
-   public function Profile()
+    public function Profile()
     {
         $id = Auth::user()->id;
         $userData = User::find($id);
@@ -51,7 +44,7 @@ class UserController extends Controller
         if ($request->file('profile')) {
             $file = $request->file('profile');
 
-            $filename = date('Y-m-d') . $file->getClientOriginalName();
+            $filename = date('YmdHi') . $file->getClientOriginalName();
             $file->move(public_path('upload/profile_images'), $filename);
             $userStore['profile'] = $filename;
         }

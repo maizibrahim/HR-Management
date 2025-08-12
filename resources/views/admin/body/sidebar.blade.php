@@ -19,27 +19,24 @@
 
         <ul class="metismenu" id="menu">
             <li>
-                <a href="javascript:;" class="has-arrow">
+                <a href="{{route('dashboard')}}" >
                     <div class="parent-icon"><i class='bx bx-home-alt'></i>
                     </div>
                     <div class="menu-title">Dashboard</div>
                 </a>
-                <ul>
-                    <li> <a href="index.html"><i class='bx bx-radio-circle'></i>Default</a>
-                    </li></ul>
             </li>
 
-            <li class="menu-label">Employee Management</li>
 
             <li><a class="has-arrow">
                     <div class="parent-icon"><i class='bx bx-group'></i>
-                    </div><div class="menu-title">Employee</div>
+                    </div><div class="menu-title">Employee Management</div>
                 </a>
                 <ul>
-                    <li> <a href="{{route('employee.all')}}"><i class='bx bx-radio-circle'></i>Registration</a></li>
-                    <li> <a href="{{route('supervisor.all')}}"><i class='bx bx-radio-circle'></i>Supervisor</a></li>
+                    <li> <a href="{{route('users.index')}}"><i class='bx bx-radio-circle'></i>User Management</a></li>
+                    <li> <a href="{{route('supervisor-management')}}"><i class='bx bx-radio-circle'></i>Supervisor Management</a></li>
                 </ul>
             </li>
+
             <li>
                 <a href="{{route('salary.all')}}">
                     <div class="parent-icon"><i class='bx bx-money'></i>
@@ -48,7 +45,7 @@
                 </a>
             </li>
 
-            <li> <a  href="{{route('leave.group.all')}}">
+            <li> <a  href="">
                     <div class="parent-icon"><i class='bx bxs-ambulance'></i></div>
                     <div class="menu-title">Leave</div>
                 </a>
@@ -61,14 +58,14 @@
 
             <li class="menu-label">Leave Management</li>
             <li>
-                <a href="">
+                <a href="{{route ('leave-requests.index')}}">
                     <div class="parent-icon"><i class='bx bxs-first-aid'></i>
                     </div>
                     <div class="menu-title">Leave Request</div>
                 </a>
             </li>
             <li>
-                <a href="">
+                <a href="{{route ('leave-requests.approval-list')}}">
                     <div class="parent-icon"><i class='bx lni-first-aid'></i>
                     </div>
                     <div class="menu-title">Leave Approval</div>
@@ -96,8 +93,10 @@
                     <div class="menu-title">Leave</div>
                 </a>
                 <ul>
-                    <li> <a href="{{route('leave.type.all')}}"><i class='bx bx-radio-circle'></i>Leave Type</a></li>
-                    <li> <a href="{{route('leave.group.all')}}"><i class='bx bx-radio-circle'></i>Leave Group</a></li>
+                     <li> <a href="{{route('leave-groups.index')}}"><i class='bx bx-radio-circle'></i>Leave Group</a></li>
+
+                    <li> <a href="{{route('leave-types.index')}}"><i class='bx bx-radio-circle'></i>Leave Type</a></li>
+
                 </ul>
             </li>
 

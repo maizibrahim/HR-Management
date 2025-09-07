@@ -64,7 +64,7 @@
                     @foreach(Auth::user()->leaveBalances as $balance)
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
-                                <strong>{{ $balance->leaveType->name }}</strong>
+                                <strong>{{ $balance->leaveType->leave_name }}</strong>
                                 <br>
                                 <small class="text-muted">Resets: {{ $balance->reset_date->format('M d, Y') }}</small>
                             </div>

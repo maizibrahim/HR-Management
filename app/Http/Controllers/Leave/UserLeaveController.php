@@ -109,33 +109,104 @@ class UserLeaveController extends Controller
      */
     public function resetLeaveBalances()
     {
-        $today = Carbon::today();
+         $today = Carbon::today();
 
         // Find all leave balances that should be reset today
-        $balancesToReset = LeaveBalance::with(['user', 'leaveType'])
-            ->whereDate('reset_date', $today)
-            ->get();
-
-        $resetCount = 0;
+        $balancesToReset = LeaveBalance::whereDate('reset_date', $today)->get();
 
         foreach ($balancesToReset as $balance) {
-            // Get the leave type's default days allowed
+            // Get the leave type default days
             $leaveType = $balance->leaveType;
 
-            // Calculate next reset date (one year from today)
+            // Calculate next reset date (one year from now)
             $nextResetDate = $today->copy()->addYear();
 
-            // Reset the balance to full allowance
+            // Update the balance
             $balance->update([
                 'days_remaining' => $leaveType->days_allowed,
                 'reset_date' => $nextResetDate,
             ]);
-
-            $resetCount++;
         }
 
-        // Return count for logging purposes
-        return $resetCount;
+        // Return count of updated balances for logging/notification
+        return $balancesToReset->count();
+    }
+
+
+    /**
+     * Sync leave balances for a specific user - ensures they have balances for all leave types in their group
+     */
+    public function syncUserLeaveBalances(User $user)
+    {
+        if (!$user->leaveGroup) {
+            return 0;
+        }
+
+        $createdCount = 0;
+        $leaveTypes = $user->leaveGroup->leaveTypes;
+
+        foreach ($leaveTypes as $leaveType) {
+            // Check if balance already exists
+            $existingBalance = LeaveBalance::where('user_id', $user->id)
+                ->where('leave_type_id', $leaveType->id)
+                ->first();
+
+            if (!$existingBalance) {
+                $this->createLeaveBalanceForUser($user, $leaveType);
+                $createdCount++;
+            }
+        }
+
+        return $createdCount;
+    }
+
+    /**
+     * Sync leave balances for all users in a specific leave group
+     */
+    public function syncLeaveGroupBalances(LeaveGroup $leaveGroup)
+    {
+        $users = User::where('leave_group_id', $leaveGroup->id)->get();
+        $totalCreated = 0;
+
+        foreach ($users as $user) {
+            $totalCreated += $this->syncUserLeaveBalances($user);
+        }
+
+        return $totalCreated;
+    }
+
+    /**
+     * Create leave balances for all leave types in a user's leave group
+     */
+    private function createLeaveBalancesForUser(User $user, int $leaveGroupId)
+    {
+        $leaveGroup = LeaveGroup::findOrFail($leaveGroupId);
+        $resetDate = Carbon::parse($user->join_date)->addYear();
+
+        foreach ($leaveGroup->leaveTypes as $leaveType) {
+            LeaveBalance::create([
+                'user_id' => $user->id,
+                'leave_type_id' => $leaveType->id,
+                'days_remaining' => $leaveType->days_allowed,
+                'reset_date' => $resetDate,
+            ]);
+        }
+    }
+
+    /**
+     * Create a single leave balance for a user and leave type
+     */
+    private function createLeaveBalanceForUser(User $user, LeaveType $leaveType)
+    {
+        // Calculate reset date based on user's join date anniversary (keep original logic)
+        $resetDate = Carbon::parse($user->join_date)->addYear();
+
+        LeaveBalance::create([
+            'user_id' => $user->id,
+            'leave_type_id' => $leaveType->id,
+            'days_remaining' => $leaveType->days_allowed,
+            'reset_date' => $resetDate,
+        ]);
     }
 
     /**

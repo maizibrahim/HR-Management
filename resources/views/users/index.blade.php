@@ -20,7 +20,7 @@
 
             <a href="{{ route('users.create') }}" type="button" class="btn btn-primary px-4 right">Add New User</a>
 
-    <div class="row justify-content-center">
+  <br><br>  <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
 
@@ -33,7 +33,7 @@
 
 
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table id="example" class="table table-striped table-bordered">
                                 <thead>
                                      <tr>
                                         <th>Name</th>
@@ -45,7 +45,7 @@
                                         <th>Actions</th>
                                      </tr>
                                 </thead>
-                                <tbody>
+
                         @forelse($users as $user)
                         <tr>
                             <td>
@@ -72,17 +72,17 @@
                             <td>{{ $user->join_date->format('d M, Y') ?? 'Not Set' }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-outline-primary" title="View">
-                                        <i class="fas fa-eye"></i>
+                                    <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-warning" title="View">
+                                        <i class="fadeIn animated bx bx-show-alt"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-outline-warning" title="Edit">
-                                        <i class="fas fa-edit"></i>
+                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-primary" title="Edit">
+                                        <i class="fadeIn animated bx bx-edit-alt"></i>
                                     </a>
-                                    <a href="{{ route('users.assign-supervisor', $user) }}" class="btn btn-sm btn-outline-info" title="Assign Supervisor">
-                                        <i class="fas fa-user-tie"></i>
+                                    <a href="{{ route('users.assign-supervisor', $user) }}" class="btn btn-sm btn-info" title="Assign Supervisor">
+                                        <i class="fadeIn animated bx bx-user"></i>
                                     </a>
-                                    <a href="{{ route('users.leave-balances', $user) }}" class="btn btn-sm btn-outline-success" title="Manage Leave">
-                                        <i class="fas fa-calendar-check"></i>
+                                    <a href="{{ route('users.leave-balances', $user) }}" class="btn btn-sm btn-success" title="Manage Leave">
+                                        <i class="fadeIn animated bx bx-calendar"></i>
                                     </a>
                                 </div>
                             </td>
@@ -92,8 +92,10 @@
                             <td colspan="7" class="text-center">No users found</td>
                         </tr>
                     @endforelse
+                            </table>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </div>

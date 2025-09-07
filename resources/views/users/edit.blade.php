@@ -58,7 +58,7 @@
                             <div class="mb-3">
                                 <label for="join_date" class="form-label">Join Date *</label>
                                 <input type="date" class="form-control @error('join_date') is-invalid @enderror"
-                                       id="join_date" name="join_date" value="{{ old('join_date', ($user->join_date)->format('d M, Y') ?? 'Not Set') }}" required>
+                                       id="join_date" name="join_date" value="{{ old('join_date', ($user->join_date)->format('Y-m-d') ?? 'Not Set') }}" required>
                                 @error('join_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

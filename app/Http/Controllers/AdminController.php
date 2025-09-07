@@ -44,11 +44,6 @@ class AdminController extends Controller
     public function StoreUser(Request $request)
     {
         $user = new User();
-        $user->username = $request->username;
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->phoneNo = $request->phoneNo;
         $user->role = 'admin';
         $user->save();
 
@@ -73,11 +68,7 @@ class AdminController extends Controller
     public function UpdateUser(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $user->username = $request->username;
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->phoneNo = $request->phoneNo;
+        $user->role = $request->role;
         $user->save();
 
         $user->roles()->detach();

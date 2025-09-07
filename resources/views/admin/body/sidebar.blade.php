@@ -27,36 +27,8 @@
             </li>
 
 
-            <li><a class="has-arrow">
-                    <div class="parent-icon"><i class='bx bx-group'></i>
-                    </div><div class="menu-title">Employee Management</div>
-                </a>
-                <ul>
-                    <li> <a href="{{route('users.index')}}"><i class='bx bx-radio-circle'></i>User Management</a></li>
-                    <li> <a href="{{route('supervisor-management')}}"><i class='bx bx-radio-circle'></i>Supervisor Management</a></li>
-                </ul>
-            </li>
-
-            <li>
-                <a href="{{route('salary.all')}}">
-                    <div class="parent-icon"><i class='bx bx-money'></i>
-                    </div>
-                    <div class="menu-title">Salary</div>
-                </a>
-            </li>
-
-            <li> <a  href="">
-                    <div class="parent-icon"><i class='bx bxs-ambulance'></i></div>
-                    <div class="menu-title">Leave</div>
-                </a>
-            </li>
-
-
-
-
-
-
-            <li class="menu-label">Leave Management</li>
+                <li class="menu-label">Leave Management</li>
+            @if(Auth::user()->can('leave.request.menu'))
             <li>
                 <a href="{{route ('leave-requests.index')}}">
                     <div class="parent-icon"><i class='bx bxs-first-aid'></i>
@@ -64,6 +36,8 @@
                     <div class="menu-title">Leave Request</div>
                 </a>
             </li>
+            @endif
+            @if(Auth::user()->can('leave-requests.approval-menu'))
             <li>
                 <a href="{{route ('leave-requests.approval-list')}}">
                     <div class="parent-icon"><i class='bx lni-first-aid'></i>
@@ -71,9 +45,31 @@
                     <div class="menu-title">Leave Approval</div>
                 </a>
             </li>
+            @endif
 
+            @if(Auth::user()->can('leave.bulk-menu'))
+             <li>
+                <a href="{{route ('leave-requests.bulk-create')}}">
+                    <div class="parent-icon"><i class='bx bxs-network-chart'></i>
+                    </div>
+                    <div class="menu-title">Leave Bulk</div>
+                </a>
+            </li>
+            @endif
+
+            @if(Auth::user()->can('leave.records-menu'))
+            <li>
+                <a href="{{route ('hr.leave-records.index')}}">
+                    <div class="parent-icon"><i class='bx bxs-ambulance'></i>
+                    </div>
+                    <div class="menu-title">Leave Records</div>
+                </a>
+            </li>
+            @endif
+
+             @if(Auth::user()->can('setup-menu'))
             <li class="menu-label">System Management</li>
-
+             @if(Auth::user()->can('designation.setup-menu'))
             <li> <a class="has-arrow" >
                     <div class="parent-icon"><i class='bx bx-briefcase'></i></div>
                     <div class="menu-title">Designation</div>
@@ -83,24 +79,34 @@
                     <li> <a href="{{route('rank.all')}}"><i class='bx bx-radio-circle'></i>Rank</a></li>
                 </ul>
             </li>
+            @endif
+             @endif
+            @if(Auth::user()->can('country.setup-menu'))
             <li> <a href="{{route('country.all')}}">
                     <div class="parent-icon"><i class='bx bx-world'></i></div>
                     <div class="menu-title">Country</div>
                 </a>
             </li>
+            @endif
+            @if(Auth::user()->can('leave.setup-menu'))
             <li> <a class="has-arrow" >
                     <div class="parent-icon"><i class='bx lni-ambulance'></i></div>
                     <div class="menu-title">Leave</div>
                 </a>
                 <ul>
+                    @if(Auth::user()->can('leave.group-menu'))
                      <li> <a href="{{route('leave-groups.index')}}"><i class='bx bx-radio-circle'></i>Leave Group</a></li>
-
+                    @endif
+                     @if(Auth::user()->can('leave.types-menu'))
                     <li> <a href="{{route('leave-types.index')}}"><i class='bx bx-radio-circle'></i>Leave Type</a></li>
-
+                    @endif
                 </ul>
             </li>
+            @endif
+              @if(Auth::user()->can('role.permission-menu'))
 
             <li class="menu-label">Roles & Permission</li>
+              @if(Auth::user()->can('authentication-menu'))
             <li>
                 <a class="has-arrow" href="javascript:;">
                     <div class="parent-icon"><i class="bx bx-lock"></i></div>
@@ -110,19 +116,23 @@
                     <li><a href="{{route('permission.all')}}"><i class='bx bx-radio-circle'></i>Permission</a></li>
                     <li><a href="{{route('roles.all')}}"><i class='bx bx-radio-circle'></i>Roles</a></li>
                     <li><a href="{{route('role.permission.all')}}"><i class='bx bx-radio-circle'></i>Roles Permission</a></li>
+                    <li><a href="{{route('user.all')}}"><i class='bx bx-radio-circle'></i>User Roles</a></li>
 
                 </ul>
             </li>
-            <li>
-                <a href="{{route('user.all')}}">
-                    <div class="parent-icon"><i class="bx bx-user-circle"></i>
-                    </div>
-                    <div class="menu-title">Manage Users</div></a>
-
+            @endif
+            @endif
+              @if(Auth::user()->can('emp-mngment-menu'))
+            <li><a class="has-arrow">
+                    <div class="parent-icon"><i class='bx bx-group'></i>
+                    </div><div class="menu-title">Employee Management</div>
+                </a>
+                <ul>
+                    <li> <a href="{{route('users.index')}}"><i class='bx bx-radio-circle'></i>User Management</a></li>
+                    <li> <a href="{{route('supervisor-management')}}"><i class='bx bx-radio-circle'></i>Supervisor Management</a></li>
+                </ul>
             </li>
-
-
-
+            @endif
         </ul>
 
         <!--end navigation-->

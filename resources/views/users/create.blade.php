@@ -100,7 +100,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="leave_group_id" class="form-label">Leave Group</label>
-                                <select class="form-select @error('leave_group_id') is-invalid @enderror"
+                                <select class="form-select @error('leave_group_id') is-invalid @enderror" id="single-select-optgroup-field"
                                         id="leave_group_id" name="leave_group_id">
                                     <option value="">Select Leave Group</option>
                                     @foreach($leaveGroups as $group)
@@ -152,5 +152,6 @@
     </div>
 
     <!--end page wrapper -->
-
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="assets/plugins/select2/js/select2-custom.js"></script>
 @endsection

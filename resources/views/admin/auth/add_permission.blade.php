@@ -42,10 +42,26 @@
                                     <div class="col-sm-9">
                                         <select name="group_name" class="form-select">
                                             <option selected="" disabled="">Select Group</option>
-                                            <option value="staff">Staff Information</option>
-                                            <option value="attendance">Attendance</option>
-                                            <option value="leave">Leave Management</option>
-                                            <option value="role">Role & Permission</option>
+                                           <optgroup label="Leave Management">
+											<option value="LeaveApproval">leave Approval</option>
+											<option value="LeaveBulk">Leave Bulk Upload</option>
+											<option value="LeaveRecords">Leave Records</option>
+                                            <option value="LeaveSetup">Leave Step</option>
+										</optgroup>
+										<optgroup label="Role & Permission">
+                                            <option value="authMenu">Authentication Menu</option>
+											<option value="role">Role</option>
+											<option value="permission">Permission</option>
+                                            	<option value="userAuth">User Authentication</option>
+										</optgroup>
+                                        <optgroup label="System Configuration">
+                                            <option value="AdminMenu">Admin Menu</option>
+											<option value="LeaveGroup">Leave Group</option>
+                                            <option value="LeaveType">Leave Type</option>
+										</optgroup>
+
+
+
 
                                         </select>
                                        </div>

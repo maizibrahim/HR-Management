@@ -5,6 +5,7 @@ namespace App\Models\leave;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 
 class LeaveRequest extends Model
@@ -22,7 +23,8 @@ class LeaveRequest extends Model
         'reviewed_by',
         'reviewed_at',
         'review_comments',
-        'documentation_path'
+        'documentation_path',
+        'pdf_report_path'
     ];
 
     protected $casts = [
@@ -44,5 +46,20 @@ class LeaveRequest extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+     // Check if PDF report exists
+    public function hasPdfReport(): bool
+    {
+        return !empty($this->pdf_report_path) && Storage::disk('public')->exists($this->pdf_report_path);
+    }
+
+    // Get PDF report URL
+    public function getPdfReportUrl(): ?string
+    {
+        if ($this->hasPdfReport()) {
+            return asset('storage/' . $this->pdf_report_path);
+        }
+        return null;
     }
 }

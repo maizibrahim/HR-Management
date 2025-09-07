@@ -52,12 +52,6 @@
                                                 <input name="password" type="password" class="form-control border-end-0" id="password" placeholder="Enter Password"> <a href="javascript:;" class="input-group-text bg-transparent"><i class="bx bx-hide"></i></a>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="form-check form-switch">
-                                                <input name="remember" class="form-check-input" type="checkbox" id="remember_me">
-                                                <label class="form-check-label" for="remember_me">Remember Me</label>
-                                            </div>
-                                        </div>
 
                                         <div class="col-12">
                                             <div class="text-right">
@@ -69,12 +63,14 @@
                                                 <button type="submit" class="btn btn-primary">Sign in</button>
                                             </div>
                                         </div>
+                                      <!-- Registration
                                         <div class="col-12">
                                             <div class="text-center ">
                                                 <p class="mb-0">Don't have an account yet? <a href="{{route('register')}}">Sign up here</a>
                                                 </p>
                                             </div>
                                         </div>
+                                    -->
 
                                     </form>
                                 </div>

@@ -8,6 +8,7 @@ use App\Http\Controllers\Employee\SupervisorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 //Employee controller
@@ -19,20 +20,16 @@ use App\Http\Controllers\Leave\LeaveGroupController;
 use App\Http\Controllers\Leave\LeaveTypeController;
 use App\Http\Controllers\Leave\LeaveRequestController;
 use App\Http\Controllers\Leave\UserLeaveController;
+use App\Http\Controllers\Leave\DailyLeaveRecordsController;
 
 
 Route::get('/', function () {
     return view('/auth/login');
-
     });
-
-
 
 Route::get('/dashboard', function () {
     return view('admin.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -96,7 +93,7 @@ Route::controller(AdminController::class)->group(function () {
    Route::get('/all/user', 'AllUser')->name('user.all');
    Route::get('/new/user', 'AddUser')->name('user.add');
    Route::post('/store/user', 'StoreUser')->name('users.store');
-   Route::get('/edit/user/{id}', 'EditUser')->name('users.edit');
+   Route::get('/edit/user/{id}', 'EditUser')->name('users.pemission.edit');
    Route::post('/update/user/{id}', 'UpdateUser')->name('user.update');
    Route::get('/delete/user/{id}','DeleteUser')->name('user.delete');
 });
@@ -167,10 +164,12 @@ Route::controller(SalaryController::class)->group(function () {
 
 
 // Leave Groups Routes
-Route::resource('leave-groups', LeaveGroupController::class);
+    Route::resource('leave-groups', LeaveGroupController::class);
+    Route::get('/leave-groups/delete/{id}', [LeaveGroupController::class, 'deleteleaveGroup'])->name('leave-groups.delete');
 
-// Leave Types Routes
-Route::resource('leave-types', LeaveTypeController::class);
+ // Leave Types Routes
+    Route::resource('leave-types', LeaveTypeController::class);
+    Route::get('/leave-types/delete/{id}', [LeaveTypeController::class, 'deleteleavetype'])->name('leave-types.delete');
 
 // Leave Requests
     Route::get('/leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
@@ -178,9 +177,19 @@ Route::resource('leave-types', LeaveTypeController::class);
     Route::post('/leave-requests', [LeaveRequestController::class, 'store'])->name('leave-requests.store');
     Route::get('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave-requests.show');
     Route::delete('/leave-requests/{leaveRequest}/cancel', [LeaveRequestController::class, 'cancel'])->name('leave-requests.cancel');
+    Route::get('/leave-requests/{leaveRequest}/download-documentation', [LeaveRequestController::class, 'downloadDocumentation'])->name('leave-requests.download-documentation');
+ // Edit functionality for adding/updating documentation
+        Route::get('/leave-requests/edit/{leaveRequest}', [LeaveRequestController::class, 'edit'])->name('leave-requests.edit');
+        Route::put('/{leaveRequest}', [LeaveRequestController::class, 'update'])->name('leave-requests.update');
+// Document management
+        Route::get('/{leaveRequest}/download-documentation', [LeaveRequestController::class, 'downloadDocumentation'])
+            ->name('download-documentation');
+
+// AJAX route for calculating working days
+    Route::post('/leave-requests/calculate-days', [LeaveRequestController::class, 'calculateDays'])->name('leave-requests.calculate-days');
 
  // Leave Approvals
-    Route::get('/leave-approvals', [LeaveRequestController::class, 'approvalList'])->name('leave-requests.approval-list');
+    Route::get('/leave-approvals', [LeaveRequestController::class, 'approvalList'])->name('leave-requests.approval-list')->middleware('permission:leave-requests.approval-list');
     Route::patch('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave-requests.approve');
     Route::patch('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave-requests.reject');
 
@@ -190,8 +199,40 @@ Route::resource('leave-types', LeaveTypeController::class);
     Route::get('/users/{user}/leave-balances', [UserLeaveController::class, 'manageLeaveBalances'])->name('users.leave-balances');
     Route::patch('/leave-balances/{leaveBalance}', [UserLeaveController::class, 'updateLeaveBalance'])->name('leave-balances.update');
 
+// Additional User Leave Management routes
+Route::post('/users/{user}/sync-leave-balances', [UserLeaveController::class, 'syncUserLeaveBalances'])->name('users.sync-leave-balances');
+Route::post('/leave-groups/{leaveGroup}/sync-balances', [UserLeaveController::class, 'syncLeaveGroupBalances'])->name('leave-groups.sync-balances');
+
+// Notifications
+Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+Route::patch('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+Route::get('/api/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread-count');
+Route::get('/api/notifications/recent-unread', [NotificationController::class, 'getRecentUnread'])->name('api.notifications.recent-unread');
+
+  // Bulk Leave Requests (Admin/HR)
+Route::get('/leave-requests/bulk/create', [LeaveRequestController::class, 'bulkCreate'])->name('leave-requests.bulk-create')->middleware('permission:leave.bulk-create');
+Route::post('/leave-requests/bulk/store', [LeaveRequestController::class, 'bulkStore'])->name('leave-requests.bulk-store');
+Route::post('/leave-requests/bulk/import', [LeaveRequestController::class, 'bulkImport'])->name('leave-requests.bulk-import');
+Route::get('/leave-requests/bulk/template', [LeaveRequestController::class, 'downloadTemplate'])->name('leave-requests.download-template');
+
+
+
+
+// Add to routes/web.php
+Route::middleware(['auth'])->group(function () {
+
+// Daily Leave Records Routes (HR Access)
+    Route::prefix('hr')->name('hr.')->group(function () {
+        Route::get('/leave-records', [DailyLeaveRecordsController::class, 'index'])->name('leave-records.index');
+        Route::get('/leave-records/export', [DailyLeaveRecordsController::class, 'export'])->name('leave-records.export');
+        Route::get('leave-records/ajax', [DailyLeaveRecordsController::class, 'getRecordsForDate'])->name('leave-records.ajax');
+        Route::get('/leave-records/{leaveRequest}', [DailyLeaveRecordsController::class, 'show'])->name('leave-records.show');
+        Route::get('/monthly-leave-report', [DailyLeaveRecordsController::class, 'monthlyReport'])->name('monthly-leave-report');
+    });
+
+});
 
 
 
 require __DIR__.'/auth.php';
-

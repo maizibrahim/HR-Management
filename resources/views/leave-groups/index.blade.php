@@ -20,7 +20,7 @@
 
             <a href="{{ route('leave-groups.create') }}" type="button" class="btn btn-primary px-4 right">Add New Leave Group</a>
 
-    <div class="row justify-content-center">
+<br><br>    <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
 
@@ -33,7 +33,7 @@
 
                     @if (count($leaveGroups) > 0)
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table id="example" class="table table-striped table-bordered">
                                 <thead>
                                     <tr>
                                         <th>Name</th>
@@ -60,18 +60,18 @@
                                                 @endif
                                             </td>
                                             <td>{{ $leaveGroup->created_at->format('M d, Y') }}</td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ route('leave-groups.show', $leaveGroup) }}" class="btn btn-sm btn-info">View</a>
-                                                    <a href="{{ route('leave-groups.edit', $leaveGroup) }}" class="btn btn-sm btn-primary">Edit</a>
 
-                                                    <form action="{{ route('leave-groups.destroy', $leaveGroup) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this leave group?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                                    </form>
+                                            <td>
+
+                                                <div class="btn-group" role="group">
+                                                   <a href="{{route('leave-groups.show', $leaveGroup)}}" class="btn btn-sm btn-warning" title="View"><i class="fadeIn animated bx bx-show-alt"></i></a>
+                                                    <a href="{{route('leave-groups.edit', $leaveGroup)}}" class="btn btn-sm btn-primary" title="Edit Data"><i class="fadeIn animated bx bx-edit-alt"></i></a>
+                                                    <a href="{{route('leave-groups.delete', $leaveGroup->id)}}" class="btn btn-sm btn-danger" title="Delete" id="delete"><i class="fadeIn animated bx bx-trash-alt"></i></a>
+
                                                 </div>
+
                                             </td>
+
                                         </tr>
                                     @endforeach
                                 </tbody>

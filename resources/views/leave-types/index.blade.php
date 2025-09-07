@@ -20,7 +20,7 @@
 
             <a href="{{ route('leave-types.create') }}" type="button" class="btn btn-primary px-4 right">Add New Leave Type</a>
 
-    <div class="row justify-content-center">
+<br><br>    <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
 
@@ -33,7 +33,7 @@
 
                     @if (count($leaveTypes) > 0)
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table id="example" class="table table-striped table-bordered">
                                 <thead>
                                    <tr>
                                         <th>Code</th>
@@ -61,18 +61,9 @@
 
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <a href="{{ route('leave-types.show', $leaveType) }}" class="btn btn-sm btn-info">View</a>
-                                                    <a href="{{ route('leave-types.edit', $leaveType) }}" class="btn btn-sm btn-primary">Edit</a>
-                                                    <a href="{{ route('leave-types.destroy', $leaveType) }}" class="btn btn-sm btn-danger" id="delete">Delete</a>
-
-                                                    <form action="{{ route('leave-types.destroy', $leaveType) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this leave type?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger" >Delete</button>
-                                                    </form>
-
-
-
+                                                    <a href="{{ route('leave-types.show', $leaveType) }}" class="btn btn-sm btn-warning"  title="View Data"><i class="fadeIn animated bx bx-show-alt"></i></a>
+                                                    <a href="{{ route('leave-types.edit', $leaveType) }}" class="btn btn-sm btn-primary" title="Edit Data"><i class="fadeIn animated bx bx-edit-alt"></i></a>
+                                                    <a href="{{ route('leave-types.delete', $leaveType->id) }}" class="btn btn-sm btn-danger" title="Delete" id="delete"><i class="fadeIn animated bx bx-trash-alt"></i></a>
                                                 </div>
                                             </td>
                                         </tr>

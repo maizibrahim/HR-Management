@@ -83,11 +83,17 @@ class LeaveGroupController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(LeaveGroup $leaveGroup)
-    {
-        $leaveGroup->delete();
 
-        return redirect()->route('leave-groups.index')
+     public function deleteleaveGroup($id)
+    {
+        LeaveGroup::findOrFail($id)->delete();
+
+          return redirect()->route('leave-groups.index')
             ->with('success', 'Leave group deleted successfully.');
+
+
+
     }
+
+
 }

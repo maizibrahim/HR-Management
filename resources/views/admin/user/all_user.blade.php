@@ -18,9 +18,6 @@
             </div>
             <!--end breadcrumb-->
 
-            <a href="{{route('user.add')}}" type="button" class="btn btn-primary px-4 right">Add User</a>
-
-
             <br><br><div class="card">
                 <div class="card-body" >
                     <div class="table-responsive">
@@ -51,7 +48,7 @@
                                     </td>
 
                                     <td>
-                                        <a href="{{route('users.edit', $item->id)}}" class="btn btn-info sm" title="Edit Data"><i class="lni lni-highlight-alt"></i></a>
+                                        <a href="{{route('users.pemission.edit', $item->id)}}" class="btn btn-info sm" title="Edit Data"><i class="lni lni-highlight-alt"></i></a>
                                         <a href="{{route('user.delete', $item->id)}}" class="btn btn-danger sm"  id="delete"><i class="lni lni-trash"></i></a>
                                     </td>
                                 </tr>

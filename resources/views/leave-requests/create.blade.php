@@ -1,13 +1,11 @@
 @extends('admin.admin_master')
 @section('admin')
 
-    <!--start page wrapper -->
-    <div class="page-wrapper">
-       <div class="container">
-
-
-
-<div class="card-header">
+<!--start page wrapper -->
+<div class="page-wrapper">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
                 <h4><i class="fas fa-calendar-plus"></i> Submit Leave Request</h4>
             </div>
             <div class="card-body">
@@ -24,6 +22,7 @@
                                     @foreach($leaveTypes as $type)
                                         <option value="{{ $type->id }}"
                                                 data-requires-docs="{{ $type->requires_documentation ? 'true' : 'false' }}"
+                                                data-balance="{{ isset($leaveBalances[$type->id]) ? $leaveBalances[$type->id]->days_remaining : 0 }}"
                                                 {{ old('leave_type_id') == $type->id ? 'selected' : '' }}>
                                             {{ $type->leave_name }}
                                             @if(isset($leaveBalances[$type->id]))
@@ -76,6 +75,31 @@
                         </div>
                     </div>
 
+                    <!-- Days Calculation Display -->
+                    <div class="mb-3" id="days-info" style="display: none;">
+                        <div class="alert alert-light border">
+                            <h6 class="mb-2"><i class="fas fa-calculator"></i> Leave Days Calculation</h6>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small class="text-muted">Total Days:</small>
+                                    <div class="fw-bold" id="total-days">0</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Working Days:</small>
+                                    <div class="fw-bold text-primary" id="working-days">0</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Weekend Days:</small>
+                                    <div class="fw-bold text-secondary" id="weekend-days">0</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Remaining Balance:</small>
+                                    <div class="fw-bold" id="remaining-balance">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label for="reason" class="form-label">Reason</label>
                         <textarea class="form-control @error('reason') is-invalid @enderror"
@@ -86,14 +110,17 @@
                         @enderror
                     </div>
 
-                    <div class="mb-3" id="documentation-section" style="display: none;">
+                    <div class="mb-3" id="documentation-field">
                         <label for="documentation" class="form-label">
-                            Documentation <span class="text-danger" id="docs-required">*</span>
+                            Documentation (Optional)
+                            <span class="text-info" id="documentation-note"></span>
                         </label>
                         <input type="file" class="form-control @error('documentation') is-invalid @enderror"
                                id="documentation" name="documentation" accept=".pdf,.jpg,.jpeg,.png">
                         <div class="form-text">
-                            Upload supporting documents (PDF, JPG, PNG). Maximum file size: 10MB.
+                            <i class="fas fa-info-circle"></i>
+                            You can upload supporting documents now or add them later before supervisor approval.
+                            Supported formats: PDF, JPG, PNG. Maximum file size: 10MB.
                         </div>
                         @error('documentation')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -103,14 +130,14 @@
                     <div class="alert alert-warning">
                         <i class="fas fa-info-circle"></i>
                         <strong>Note:</strong> Your leave request will be sent to your supervisor for approval.
-                        Only weekdays (Monday-Friday) are counted as leave days.
+                        Only weekdays are counted as leave days.
                     </div>
 
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('leave-requests.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
                             <i class="fas fa-paper-plane"></i> Submit Request
                         </button>
                     </div>
@@ -120,52 +147,138 @@
     </div>
 </div>
 
-
 @endsection
-@section('scripts')
+
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const leaveTypeSelect = document.getElementById('leave_type_id');
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const documentationField = document.getElementById('documentation-field');
+    const documentationRequired = document.getElementById('documentation-required');
+    const documentationInput = document.getElementById('documentation');
+    const daysInfo = document.getElementById('days-info');
+    const submitBtn = document.getElementById('submit-btn');
     const balanceInfo = document.getElementById('balance-info');
-    const documentationSection = document.getElementById('documentation-section');
-    const docsRequired = document.getElementById('docs-required');
 
-    const balances = @json($leaveBalances);
+    // Leave balances data from the controller
+    const leaveBalances = @json($leaveBalances);
 
+    // Handle leave type change
     leaveTypeSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
-        const leaveTypeId = this.value;
-        const requiresDocs = selectedOption.getAttribute('data-requires-docs') === 'true';
+        const requiresDocumentation = selectedOption.dataset.requiresDocs === 'true';
+        const balance = selectedOption.dataset.balance;
+
+        // Update documentation note based on leave type
+        const documentationNote = document.getElementById('documentation-note');
+        if (requiresDocumentation) {
+            documentationNote.innerHTML = '- <strong>Required for this leave type</strong>';
+            documentationNote.className = 'text-warning';
+        } else {
+            documentationNote.innerHTML = '';
+            documentationNote.className = 'text-info';
+        }
 
         // Update balance info
-        if (leaveTypeId && balances[leaveTypeId]) {
-            const balance = balances[leaveTypeId];
-            balanceInfo.innerHTML = `<strong>${balance.days_remaining}</strong> days remaining`;
-            balanceInfo.className = `alert ${balance.days_remaining > 5 ? 'alert-success' : (balance.days_remaining > 0 ? 'alert-warning' : 'alert-danger')}`;
-        } else if (leaveTypeId) {
-            balanceInfo.innerHTML = '<strong>No balance available</strong>';
-            balanceInfo.className = 'alert alert-danger';
+        if (this.value) {
+            balanceInfo.innerHTML = `<i class="fas fa-calendar-check"></i> Available Balance: <strong>${balance} days</strong>`;
+            balanceInfo.className = balance > 0 ? 'alert alert-success' : 'alert alert-warning';
         } else {
             balanceInfo.innerHTML = 'Select a leave type to see your balance';
             balanceInfo.className = 'alert alert-info';
         }
 
-        // Show/hide documentation section
-        if (requiresDocs) {
-            documentationSection.style.display = 'block';
-            docsRequired.style.display = 'inline';
-            document.getElementById('documentation').required = true;
+        calculateDays();
+    });
+
+    // Handle date changes
+    startDateInput.addEventListener('change', function() {
+        endDateInput.min = this.value;
+        if (endDateInput.value && endDateInput.value < this.value) {
+            endDateInput.value = this.value;
+        }
+        calculateDays();
+    });
+
+    endDateInput.addEventListener('change', calculateDays);
+
+    function calculateDays() {
+        const leaveTypeId = leaveTypeSelect.value;
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
+
+        if (!leaveTypeId || !startDate || !endDate) {
+            daysInfo.style.display = 'none';
+            return;
+        }
+
+        // Calculate working days (excluding weekends)
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        let totalDays = 0;
+        let workingDays = 0;
+        let weekendDays = 0;
+
+        for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+            totalDays++;
+            // In many countries, Saturday (6) and Sunday (0) are weekends
+            // Adjust this based on your local weekend days
+            if (date.getDay() === 0 || date.getDay() === 6) {
+                weekendDays++;
+            } else {
+                workingDays++;
+            }
+        }
+
+        // Update display
+        document.getElementById('total-days').textContent = totalDays;
+        document.getElementById('working-days').textContent = workingDays;
+        document.getElementById('weekend-days').textContent = weekendDays;
+
+        // Get current balance for selected leave type
+        const selectedOption = leaveTypeSelect.options[leaveTypeSelect.selectedIndex];
+        const currentBalance = parseInt(selectedOption.dataset.balance) || 0;
+        const remainingAfter = currentBalance - workingDays;
+
+        document.getElementById('remaining-balance').textContent = remainingAfter;
+
+        // Show warning if insufficient balance
+        const balanceSpan = document.getElementById('remaining-balance');
+        if (remainingAfter < 0) {
+            balanceSpan.className = 'fw-bold text-danger';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Insufficient Balance';
+            submitBtn.className = 'btn btn-danger';
         } else {
-            documentationSection.style.display = 'none';
-            docsRequired.style.display = 'none';
-            document.getElementById('documentation').required = false;
+            balanceSpan.className = 'fw-bold text-success';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
+            submitBtn.className = 'btn btn-primary';
+        }
+
+        daysInfo.style.display = 'block';
+    }
+
+    // Form validation before submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Check if there's sufficient balance
+        const selectedOption = leaveTypeSelect.options[leaveTypeSelect.selectedIndex];
+        const currentBalance = parseInt(selectedOption.dataset.balance) || 0;
+        const workingDays = parseInt(document.getElementById('working-days').textContent) || 0;
+
+        if (currentBalance < workingDays) {
+            e.preventDefault();
+            alert('You do not have sufficient leave balance for this request.');
+            return false;
         }
     });
 
-    // Trigger change event if there's a selected value (for form validation errors)
+    // Initialize form state
     if (leaveTypeSelect.value) {
         leaveTypeSelect.dispatchEvent(new Event('change'));
     }
 });
 </script>
-@endsection
+@endpush

@@ -6,13 +6,13 @@
         <div class="page-content">
             <!--breadcrumb-->
             <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-                <div class="breadcrumb-title pe-3">Edit User</div>
+                <div class="breadcrumb-title pe-3">Edit User Authentication</div>
                 <div class="ps-3">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0 p-0">
                             <li class="breadcrumb-item"><a href="/dashboard"><i class="bx bx-home-alt"></i></a></li>
                             <li class="breadcrumb-item"><a href="/all/user">All users</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Edit User</li>
+                            <li class="breadcrumb-item active" aria-current="page">Edit User Authentication</li>
                         </ol>
                     </nav>
                 </div>
@@ -31,36 +31,35 @@
                                 <div class="row mb-3">
                                     <label for="input35" class="col-sm-3 col-form-label">Full Name</label>
                                     <div class="col-sm-9">
-
-                                        <input  type="text" class="form-control" id="name" name="name" value="{{$user->name}}">
+                                          <label for="input35" class="col-sm-3 col-form-label">{{$user->name}}</label>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="input37" class="col-sm-3 col-form-label">User Name</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" id="username" name="username" value="{{$user->username}}">
+                                          <label for="input37" class="col-sm-3 col-form-label">{{$user->username}}</label>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="input37" class="col-sm-3 col-form-label">Email Address</label>
                                     <div class="col-sm-9">
-                                        <input type="email" class="form-control" id="email" name="email" value="{{$user->email}}">
-                                    </div>
+                                        <label for="input37" class="col-sm-3 col-form-label">{{$user->email}}</label>
+                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
-                                    <label for="input37" class="col-sm-3 col-form-label">Password</label>
+                                    <label for="input37" class="col-sm-3 col-form-label">Responsibility</label>
                                     <div class="col-sm-9">
-                                        <input type="password" class="form-control" id="password" name="password" value="{{$user->password}}">
+                                        <select name="role" class="form-select">
+                                            <option selected="" disabled="">Select Group</option>
+                                            <option value="admin" {{$user->role == 'admin' ? 'selected' : ''}}>Admin Staff</option>
+                                            <option value="hr" {{$user->role == 'hr' ? 'selected' : ''}}>HR Staff</option>
+                                            <option value="leading"{{$user->role == 'leading' ? 'selected' : ''}}>Leading Teacher</option>
+
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div class="row mb-3">
-                                    <label for="input37" class="col-sm-3 col-form-label">PhoneNo</label>
-                                    <div class="col-sm-9">
-                                        <input type="text" class="form-control" id="phoneNo" name="phoneNo" value="{{$user->phoneNo}}">
-                                    </div>
-                                </div>
 
                                 <div class="row mb-3">
                                     <label for="example-text-input" class="col-sm-3 col-form-label">Role Name</label>

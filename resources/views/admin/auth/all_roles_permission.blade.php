@@ -23,8 +23,8 @@
 
             <br><br><div class="card">
                 <div class="card-body" >
-                    <div class="table-responsive">
-                        <table id="example" class="table table-striped table-bordered">
+                    <div class="">
+                        <table id="" class="table table-striped table-bordered">
                             <thead>
                             <tr>
                                 <th>Sl</th>
@@ -44,8 +44,8 @@
                                         @endforeach
                                     </td>
                                     <td>
-                                        <a href="{{route('role.permission.edit', $item->id)}}" class="btn btn-info sm" title="Edit Data"><i class="lni lni-highlight-alt"></i></a>
-                                        <a href="{{route('role.permission.delete', $item->id)}}" class="btn btn-danger sm"  id="delete"><i class="lni lni-trash"></i></a>
+                                        <a href="{{route('role.permission.edit', $item->id)}}" class="btn btn-sm btn-primary" title="Edit Data"><i class="fadeIn animated bx bx-edit-alt"></i></a>
+                                        <a href="{{route('role.permission.delete', $item->id)}}" class="btn btn-sm btn-danger"  id="delete"><i class="fadeIn animated bx bx-trash-alt"></i></a>
                                     </td>
                                 </tr>
                             @endforeach

@@ -9,62 +9,76 @@
             <p class="text-muted">Welcome back, {{ Auth::user()->name }}</p>
             </div>
         </div><!--end row-->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
-            <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
-                <h5>{{ Auth::user()->leaveBalances->sum('days_remaining') }}</h5>
-                <p class="text-muted mb-0">Total Leave Days</p>
-            </div>
-        </div>
-    </div>
-     <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
-                <h5>{{ Auth::user()->leaveRequests()->where('status', 'pending')->count() }}</h5>
-                <p class="text-muted mb-0">Pending Requests</p>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                <h5>{{ Auth::user()->leaveRequests()->where('status', 'approved')->count() }}</h5>
-                <p class="text-muted mb-0">Approved Requests</p>
-            </div>
-        </div>
-    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3">
+    <!--
+        <div class="col">
+				 <div class="card radius-10 bg-gradient-cosmic">
+					<div class="card-body">
+						<div class="d-flex align-items">
+							<div class="me-auto ">
+                                	<h4 class="my-1 text-white">{{ Auth::user()->leaveBalances->sum('days_remaining') }}</h4>
+								<p class="mb-0 text-white center">Total Leave Days</p>
+							</div>
+						</div>
+					</div>
+				 </div>
+		</div>
+    -->
 
-     @if(Auth::user()->subordinates->count() > 0)
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <i class="fas fa-users fa-2x text-info mb-2"></i>
-                    <h5>{{ Auth::user()->subordinates()->whereHas('leaveRequests', function($q) { $q->where('status', 'pending'); })->count() }}</h5>
-                    <p class="text-muted mb-0">Team Approvals</p>
-                </div>
-            </div>
-        </div>
-    @endif
-    </div><!--end row-->
+        <div class="col">
+				 <div class="card radius-10 bg-gradient-ibiza">
+					<div class="card-body">
+						<div class="d-flex align-items">
+							<div class="me-auto ">
+                                	<h4 class="my-1 text-white">{{ Auth::user()->leaveRequests()->where('status', 'pending')->count() }}</h4>
+								<p class="mb-0 text-white center">Pending Requests</p>
+							</div>
+						</div>
+					</div>
+				 </div>
+		</div>
+        <div class="col">
+				 <div class="card radius-10 bg-gradient-ohhappiness">
+					<div class="card-body">
+						<div class="d-flex align-items">
+							<div class="me-auto ">
+                                	<h4 class="my-1 text-white">{{ Auth::user()->leaveRequests()->where('status', 'approved')->count() }}</h4>
+								<p class="mb-0 text-white center">Approved Requests</p>
+							</div>
+						</div>
+					</div>
+				 </div>
+		</div>
+         @if(Auth::user()->subordinates->count() > 0)
+         <div class="col">
+				 <div class="card radius-10 bg-gradient-kyoto">
+					<div class="card-body">
+						<div class="d-flex align-items">
+							<div class="me-auto ">
+                                	<h4 class="my-1 text-white">{{ Auth::user()->subordinates()->whereHas('leaveRequests', function($q) { $q->where('status', 'pending'); })->count() }}</h4>
+								<p class="mb-0 text-white center">Team Approvals</p>
+							</div>
+						</div>
+					</div>
+				 </div>
+		</div>
+        @endif
+    </div>
 
 <div class="row">
     <!-- Leave Balance Summary -->
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h6><i class="fas fa-chart-pie"></i> My Leave Balance</h6>
+                <h6><i class="lni lni-pie-chart"></i>My Leave Balance</h6>
             </div>
             <div class="card-body">
                 @if(Auth::user()->leaveBalances->count() > 0)
                     @foreach(Auth::user()->leaveBalances as $balance)
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
-                                <strong>{{ $balance->leaveType->name }}</strong>
+                                <strong>{{ $balance->leaveType->leave_name }}</strong>
                                 <br>
                                 <small class="text-muted">Resets: {{ $balance->reset_date->format('M d, Y') }}</small>
                             </div>
@@ -83,7 +97,7 @@
                     </div>
                 @else
                     <div class="text-center text-muted">
-                        <i class="fas fa-info-circle"></i>
+                        <i class="lni lni-checkmark-circle"></i>
                         <p>No leave balances assigned. Contact HR.</p>
                     </div>
                 @endif
@@ -95,7 +109,7 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h6><i class="fas fa-history"></i> Recent Activity</h6>
+                <h6><i class="lni lni-stackoverflow"></i> Recent Activity</h6>
             </div>
             <div class="card-body">
                 @php
@@ -106,11 +120,11 @@
                     @foreach($recentRequests as $request)
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
-                                <strong>{{ $request->leaveType->name }}</strong>
+                                <strong>{{ $request->leaveType->leave_name }}</strong>
                                 <br>
                                 <small class="text-muted">{{ $request->start_date->format('M d') }} - {{ $request->end_date->format('M d, Y') }}</small>
                             </div>
-                            <span class="badge bg-{{ $request->status == 'approved' ? 'success' : ($request->status == 'rejected' ? 'danger' : 'warning') }}">
+                            <span class="badge bg-{{ $request->status == 'approved' ? 'success' : ($request->status == 'rejected' ? 'danger' : 'warning') }} fs-6">
                                 {{ ucfirst($request->status) }}
                             </span>
                         </div>
@@ -163,7 +177,7 @@
                                     @foreach($teamPendingRequests->take(10) as $request)
                                         <tr>
                                             <td>{{ $request->user->name }}</td>
-                                            <td><span class="badge bg-info">{{ $request->leaveType->name }}</span></td>
+                                            <td><span class="badge bg-info">{{ $request->leaveType->leave_name }}</span></td>
                                             <td>{{ $request->start_date->format('M d') }} - {{ $request->end_date->format('M d') }}</td>
                                             <td>{{ $request->days_requested }}</td>
                                             <td>

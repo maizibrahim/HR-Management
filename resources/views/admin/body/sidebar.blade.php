@@ -102,8 +102,17 @@
                     @endif
                 </ul>
             </li>
+             @if(Auth::user()->can('public.holiday-menu'))
+            <li>
+                <a href="{{ route('public-holidays.index') }}">
+                    <div class="parent-icon"><i class='lni lni-island'></i>
+                    </div>
+                    <div class="menu-title">Public Holiday</div>
+                </a>
+            </li>
             @endif
-              @if(Auth::user()->can('role.permission-menu'))
+            @endif
+            @if(Auth::user()->can('role.permission-menu'))
 
             <li class="menu-label">Roles & Permission</li>
               @if(Auth::user()->can('authentication-menu'))

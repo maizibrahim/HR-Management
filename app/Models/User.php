@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\leave\LeaveBalance;
 use App\Models\leave\LeaveGroup;
 use App\Models\leave\LeaveRequest;
+use App\Notifications\CustomVerifyEmail;
 use App\Models\leave\LeaveType;
 
 
@@ -330,6 +331,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasSufficientBalance($leaveTypeId, $daysRequested): bool
     {
         return $this->getRemainingLeaveDays($leaveTypeId) >= $daysRequested;
+    }
+
+    /**
+     * Send the email verification notification.
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail);
     }
 
 

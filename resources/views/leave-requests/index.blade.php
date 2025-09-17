@@ -4,13 +4,14 @@
 <!--start page wrapper -->
 <div class="page-wrapper">
     <div class="container">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+
+           <br> <div class="card-header d-flex justify-content-between align-items-center">
                 <h4><i class="fas fa-calendar-alt"></i> My Leave Requests</h4>
                 <a href="{{ route('leave-requests.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> New Request
                 </a>
             </div>
+           <br> <div class="card">
             <div class="card-body">
                 @if($leaveRequests->isEmpty())
                     <div class="text-center py-4">

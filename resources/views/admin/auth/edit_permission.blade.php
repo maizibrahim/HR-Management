@@ -1,9 +1,5 @@
 @extends('admin.admin_master')
 @section('admin')
-
-
-
-
     <!--start page wrapper -->
     <div class="page-wrapper">
         <div class="page-content">
@@ -30,14 +26,15 @@
                         </div>
 
                         <div class="card-body p-4">
-                            <form method="POST" action="{{route('permission.update')}}" >
+                            <form method="POST" action="{{ route('permission.update') }}">
                                 @csrf
-                                <input type="hidden" name="id"  value="{{$permission->id}}">
+                                <input type="hidden" name="id" value="{{ $permission->id }}">
 
                                 <div class="row mb-3">
                                     <label for="input35" class="col-sm-3 col-form-label">Permission Name</label>
                                     <div class="col-sm-9">
-                                        <input  type="text" class="form-control" name="name" value="{{$permission->name}}">
+                                        <input type="text" class="form-control" name="name"
+                                            value="{{ $permission->name }}">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -45,11 +42,45 @@
                                     <div class="col-sm-9">
                                         <select name="group_name" class="form-select">
                                             <option selected="" disabled="">Select Group</option>
-                                            <option value="staff" {{$permission->group_name == 'staff' ? 'selected' : ''}}>Staff Information</option>
-                                            <option value="attendance" {{$permission->group_name == 'attendance' ? 'selected' : ''}}>Attendance</option>
-                                            <option value="leave"{{$permission->group_name == 'leave' ? 'selected' : ''}}>Leave Management</option>
-                                            <option value="role"{{$permission->group_name == 'role' ? 'selected' : ''}}>Role & Permission</option>
-
+                                            <optgroup label="Leave Management">
+                                                <option value="LeaveApproval"
+                                                    {{ $permission->group_name == 'LeaveApproval' ? 'selected' : '' }}>leave
+                                                    Approval</option>
+                                                <option
+                                                    value="LeaveBulk"{{ $permission->group_name == 'LeaveBulk' ? 'selected' : '' }}>
+                                                    Leave Bulk Upload</option>
+                                                <option
+                                                    value="LeaveRecords"{{ $permission->group_name == 'LeaveRecords' ? 'selected' : '' }}>
+                                                    Leave Records</option>
+                                                <option
+                                                    value="LeaveSetup"{{ $permission->group_name == 'LeaveSetup' ? 'selected' : '' }}>
+                                                    Leave Step</option>
+                                            </optgroup>
+                                            <optgroup label="Role & Permission">
+                                                <option
+                                                    value="authMenu"{{ $permission->group_name == 'authMenu' ? 'selected' : '' }}>
+                                                    Authentication Menu</option>
+                                                <option
+                                                    value="role"{{ $permission->group_name == 'role' ? 'selected' : '' }}>
+                                                    Role</option>
+                                                <option
+                                                    value="permission"{{ $permission->group_name == 'permission' ? 'selected' : '' }}>
+                                                    Permission</option>
+                                                <option
+                                                    value="userAuth"{{ $permission->group_name == 'userAuth' ? 'selected' : '' }}>
+                                                    User Authentication</option>
+                                            </optgroup>
+                                            <optgroup label="System Configuration">
+                                                <option value="AdminMenu"
+                                                    {{ $permission->group_name == 'AdminMenu' ? 'selected' : '' }}>Admin
+                                                    Menu</option>
+                                                <option value="LeaveGroup"
+                                                    {{ $permission->group_name == 'LeaveGroup' ? 'selected' : '' }}>Leave
+                                                    Group</option>
+                                                <option value="LeaveType"
+                                                    {{ $permission->group_name == 'LeaveType' ? 'selected' : '' }}>Leave
+                                                    Type</option>
+                                            </optgroup>
                                         </select>
                                     </div>
                                 </div>
@@ -59,8 +90,10 @@
                                     <label class="col-sm-3 col-form-label"></label>
                                     <div class="col-sm-9">
                                         <div class="d-md-flex d-grid align-items-center gap-3">
-                                            <button type="submit" class="btn btn-primary px-4" name="submit">Update</button>
-                                            <a href="{{url()->previous()}}" type="reset" class="btn btn-secondary px-5">Cancel</a>
+                                            <button type="submit" class="btn btn-primary px-4"
+                                                name="submit">Update</button>
+                                            <a href="{{ url()->previous() }}" type="reset"
+                                                class="btn btn-secondary px-5">Cancel</a>
                                         </div>
                                     </div>
                                 </div>
@@ -77,6 +110,4 @@
     </div>
 
     <!--end page wrapper -->
-
-
 @endsection

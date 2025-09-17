@@ -11,6 +11,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\PublicHolidayController;
+
 //Employee controller
 use App\Http\Controllers\Employee\DesignationController;
 use App\Http\Controllers\Employee\EmployeeRegController;
@@ -186,7 +188,7 @@ Route::controller(SalaryController::class)->group(function () {
             ->name('download-documentation');
 
 // AJAX route for calculating working days
-    Route::post('/leave-requests/calculate-days', [LeaveRequestController::class, 'calculateDays'])->name('leave-requests.calculate-days');
+   // Route::post('/leave-requests/calculate-days', [LeaveRequestController::class, 'calculateDays'])->name('leave-requests.calculate-days');
 
  // Leave Approvals
     Route::get('/leave-approvals', [LeaveRequestController::class, 'approvalList'])->name('leave-requests.approval-list')->middleware('permission:leave-requests.approval-list');
@@ -202,6 +204,16 @@ Route::controller(SalaryController::class)->group(function () {
 // Additional User Leave Management routes
 Route::post('/users/{user}/sync-leave-balances', [UserLeaveController::class, 'syncUserLeaveBalances'])->name('users.sync-leave-balances');
 Route::post('/leave-groups/{leaveGroup}/sync-balances', [UserLeaveController::class, 'syncLeaveGroupBalances'])->name('leave-groups.sync-balances');
+
+// Public Holidays Management (Admin/HR)
+Route::resource('public-holidays', PublicHolidayController::class);
+Route::post('/public-holidays/bulk-import', [PublicHolidayController::class, 'bulkImport'])->name('public-holidays.bulk-import');
+Route::post('/public-holidays/generate-recurring', [PublicHolidayController::class, 'generateRecurring'])->name('public-holidays.generate-recurring');
+
+// AJAX endpoint for leave days calculation
+Route::post('/leave-requests/calculate-days', [LeaveRequestController::class, 'calculateDaysPreview'])->name('leave-requests.calculate-days');
+
+
 
 // Notifications
 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

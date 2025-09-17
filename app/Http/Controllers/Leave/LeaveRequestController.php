@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Leave;
 use App\Models\leave\LeaveRequest;
 use App\Models\leave\LeaveType;
 use App\Models\leave\LeaveBalance;
+use App\Models\PublicHoliday;
 use App\Services\LeaveReportService;
 use App\Providers\LeaveReportServiceProvider;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\LeaveRequestSubmitted;
+use App\Notifications\LeaveRequestStatusChanged;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 
@@ -83,7 +86,7 @@ class LeaveRequestController extends Controller
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'nullable|string',
-            'documentation' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240', // Made optional
+            'documentation' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ]);
 
         $leaveType = LeaveType::findOrFail($validated['leave_type_id']);
@@ -93,16 +96,8 @@ class LeaveRequestController extends Controller
             return redirect()->back()->withErrors(['leave_type_id' => 'This leave type is not available for your leave group.']);
         }
 
-        // Calculate the number of days requested (excluding weekends)
-        $startDate = Carbon::parse($validated['start_date']);
-        $endDate = Carbon::parse($validated['end_date']);
-
-        $daysRequested = 0;
-        for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
-            if ($date->isWeekday()) {
-                $daysRequested++;
-            }
-        }
+        // Calculate the number of days requested (excluding weekends and public holidays)
+        $daysRequested = $this->calculateLeaveDays($validated['start_date'], $validated['end_date']);
 
         // Check if the user has enough leave balance
         $leaveBalance = LeaveBalance::where('user_id', $user->id)
@@ -113,10 +108,12 @@ class LeaveRequestController extends Controller
             return redirect()->back()->withErrors(['leave_type_id' => 'You do not have enough leave balance for this request.']);
         }
 
-        // Handle optional file upload
+        // Handle file upload if documentation is required or provided
         $documentationPath = null;
         if ($request->hasFile('documentation')) {
             $documentationPath = $request->file('documentation')->store('leave-documentation', 'public');
+        } else if ($leaveType->requires_documentation) {
+            return redirect()->back()->withErrors(['documentation' => 'Documentation is required for this leave type.']);
         }
 
         // Create leave request
@@ -133,6 +130,11 @@ class LeaveRequestController extends Controller
         $message = 'Leave request submitted successfully and awaiting approval.';
         if ($leaveType->requires_documentation && !$documentationPath) {
             $message .= ' Note: Documentation is required for this leave type. You can add it before supervisor approval.';
+        }
+
+        // Notify supervisor
+        if ($user->supervisor) {
+            $user->supervisor->notify(new LeaveRequestSubmitted($leaveRequest));
         }
 
         return redirect()->route('leave-requests.index')
@@ -303,6 +305,9 @@ class LeaveRequestController extends Controller
             ]);
         }
 
+         // Notify employee
+        $leaveRequest->user->notify(new LeaveRequestStatusChanged($leaveRequest, 'approved'));
+
         return redirect()->route('leave-requests.approval-list')
             ->with('success', 'Leave request approved successfully.');
     }
@@ -326,8 +331,11 @@ class LeaveRequestController extends Controller
             'review_comments' => $validated['review_comments'],
         ]);
 
-        // Note: No balance deduction for rejected requests
+        // Notify employee
+        $leaveRequest->user->notify(new LeaveRequestStatusChanged($leaveRequest, 'rejected'));
 
+
+        // Note: No balance deduction for rejected requests
         return redirect()->route('leave-requests.approval-list')
             ->with('success', 'Leave request rejected successfully.');
     }
@@ -634,42 +642,87 @@ class LeaveRequestController extends Controller
     }
 
     /**
-     * Calculate working days between two dates (excluding Friday and Saturday)
-     * In Maldives, Friday and Saturday are weekends
+     * Calculate leave days excluding weekends and public holidays
      */
-    private function calculateWorkingDays(Carbon $startDate, Carbon $endDate): int
+    private function calculateLeaveDays($startDate, $endDate)
     {
-        $workingDays = 0;
+        $startDate = Carbon::parse($startDate);
+        $endDate = Carbon::parse($endDate);
+
+        // Get public holidays between the dates
+        $publicHolidays = PublicHoliday::getHolidaysBetweenDates($startDate, $endDate);
+        $publicHolidayDates = $publicHolidays->pluck('date')->map(function($date) {
+            return Carbon::parse($date)->format('Y-m-d');
+        })->toArray();
+
+        $daysRequested = 0;
 
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-            // Friday = 5, Saturday = 6 in Carbon (0=Sunday, 1=Monday, ..., 6=Saturday)
-            if (!in_array($date->dayOfWeek, [Carbon::FRIDAY, Carbon::SATURDAY])) {
-                $workingDays++;
+            // Count only weekdays that are not public holidays
+            if ($date->isWeekday() && !in_array($date->format('Y-m-d'), $publicHolidayDates)) {
+                $daysRequested++;
             }
         }
 
-        return $workingDays;
+        return $daysRequested;
     }
-
     /**
      * Get working days count for AJAX requests (for frontend calculations)
      */
-    public function calculateDays(Request $request)
+    /**
+     * Get leave days breakdown for preview (AJAX endpoint)
+     */
+    public function calculateDaysPreview(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
-        $startDate = Carbon::parse($request->start_date);
-        $endDate = Carbon::parse($request->end_date);
+        $startDate = Carbon::parse($validated['start_date']);
+        $endDate = Carbon::parse($validated['end_date']);
 
-        $workingDays = $this->calculateWorkingDays($startDate, $endDate);
+        $totalDays = $startDate->diffInDays($endDate) + 1;
+        $weekends = 0;
+        $publicHolidays = 0;
+        $leaveDays = 0;
+
+        // Get public holidays between the dates
+        $publicHolidaysData = PublicHoliday::getHolidaysBetweenDates($startDate, $endDate);
+        $publicHolidayDates = $publicHolidaysData->pluck('date')->map(function($date) {
+            return Carbon::parse($date)->format('Y-m-d');
+        })->toArray();
+
+        $breakdown = [];
+
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+            $dayInfo = [
+                'date' => $date->format('Y-m-d'),
+                'day_name' => $date->format('l'),
+                'type' => 'leave_day'
+            ];
+
+            if ($date->isWeekend()) {
+                $weekends++;
+                $dayInfo['type'] = 'weekend';
+            } elseif (in_array($date->format('Y-m-d'), $publicHolidayDates)) {
+                $publicHolidays++;
+                $dayInfo['type'] = 'public_holiday';
+                $holiday = $publicHolidaysData->where('date', $date->format('Y-m-d'))->first();
+                $dayInfo['holiday_name'] = $holiday ? $holiday->name : '';
+            } else {
+                $leaveDays++;
+            }
+
+            $breakdown[] = $dayInfo;
+        }
 
         return response()->json([
-            'working_days' => $workingDays,
-            'total_days' => $startDate->diffInDays($endDate) + 1,
-            'weekend_days' => ($startDate->diffInDays($endDate) + 1) - $workingDays
+            'total_days' => $totalDays,
+            'weekends' => $weekends,
+            'public_holidays' => $publicHolidays,
+            'leave_days' => $leaveDays,
+            'breakdown' => $breakdown
         ]);
     }
 

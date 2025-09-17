@@ -48,8 +48,8 @@
                                     </td>
 
                                     <td>
-                                        <a href="{{route('users.pemission.edit', $item->id)}}" class="btn btn-info sm" title="Edit Data"><i class="lni lni-highlight-alt"></i></a>
-                                        <a href="{{route('user.delete', $item->id)}}" class="btn btn-danger sm"  id="delete"><i class="lni lni-trash"></i></a>
+                                        <a href="{{route('users.pemission.edit', $item->id)}}" class="btn btn-sm btn-primary" title="Edit Data"><i class="fadeIn animated bx bx-edit-alt"></i></a>
+                                        <a href="{{route('user.delete', $item->id)}}" class="btn btn-sm btn-danger"  id="delete"><i class="fadeIn animated bx bx-trash-alt"></i></a>
                                     </td>
                                 </tr>
                             @endforeach

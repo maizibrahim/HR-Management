@@ -31,19 +31,19 @@
                                 <div class="row mb-3">
                                     <label for="input35" class="col-sm-3 col-form-label">Full Name</label>
                                     <div class="col-sm-9">
-                                          <label for="input35" class="col-sm-3 col-form-label">{{$user->name}}</label>
+                                          <label for="input35" class="col-sm-6 col-form-label">{{$user->name}}</label>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="input37" class="col-sm-3 col-form-label">User Name</label>
                                     <div class="col-sm-9">
-                                          <label for="input37" class="col-sm-3 col-form-label">{{$user->username}}</label>
+                                          <label for="input37" class="col-sm-6 col-form-label">{{$user->username}}</label>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <label for="input37" class="col-sm-3 col-form-label">Email Address</label>
                                     <div class="col-sm-9">
-                                        <label for="input37" class="col-sm-3 col-form-label">{{$user->email}}</label>
+                                        <label for="input37" class="col-sm-6 col-form-label">{{$user->email}}</label>
                                      </div>
                                 </div>
 

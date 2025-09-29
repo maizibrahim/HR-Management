@@ -55,7 +55,7 @@
                                 <label for="start_date" class="form-label">Start Date *</label>
                                 <input type="date" class="form-control @error('start_date') is-invalid @enderror"
                                        id="start_date" name="start_date" value="{{ old('start_date') }}"
-                                       min="{{ date('Y-m-d') }}" required>
+                                       min="{{ date('Y-m-d', strtotime('-2 day')) }}" required>
                                 @error('start_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
             totalDays++;
             // In many countries, Saturday (6) and Sunday (0) are weekends
             // Adjust this based on your local weekend days
-            if (date.getDay() === 0 || date.getDay() === 6) {
+            if (date.getDay() === 5 || date.getDay() === 6) {
                 weekendDays++;
             } else {
                 workingDays++;

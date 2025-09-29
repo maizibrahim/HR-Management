@@ -83,7 +83,7 @@ class LeaveRequestController extends Controller
 
         $validated = $request->validate([
             'leave_type_id' => 'required|exists:leave_types,id',
-            'start_date' => 'required|date|after_or_equal:today',
+            'start_date' => 'required|date|after_or_equal:' . Carbon::yesterday()->toDateString(),
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'nullable|string',
             'documentation' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
@@ -113,7 +113,7 @@ class LeaveRequestController extends Controller
         if ($request->hasFile('documentation')) {
             $documentationPath = $request->file('documentation')->store('leave-documentation', 'public');
         } else if ($leaveType->requires_documentation) {
-            return redirect()->back()->withErrors(['documentation' => 'Documentation is required for this leave type.']);
+            return redirect()->back()->withErrors(['documentation' => 'Document required.']);
         }
 
         // Create leave request
@@ -439,16 +439,10 @@ class LeaveRequestController extends Controller
             ];
         }
 
-        // Calculate days requested (excluding weekends)
-        $startDate = Carbon::parse($requestData['start_date']);
-        $endDate = Carbon::parse($requestData['end_date']);
+         // Calculate the number of days requested (excluding weekends and public holidays)
+        $daysRequested = $this->calculateLeaveDays($requestData['start_date'], $requestData['end_date']);
 
-        $daysRequested = 0;
-        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-            if ($date->isWeekday()) {
-                $daysRequested++;
-            }
-        }
+
 
         // Check leave balance if not overriding
         if (!($requestData['override_balance_check'] ?? false)) {
@@ -659,7 +653,9 @@ class LeaveRequestController extends Controller
 
         for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
             // Count only weekdays that are not public holidays
-            if ($date->isWeekday() && !in_array($date->format('Y-m-d'), $publicHolidayDates)) {
+            $dayOfWeek = $date->dayOfWeek;
+
+            if ($date->dayOfWeek !== 5 && $date->dayOfWeek !== 6 && !in_array($date->format('Y-m-d'), $publicHolidayDates)) {
                 $daysRequested++;
             }
         }
@@ -702,7 +698,7 @@ class LeaveRequestController extends Controller
                 'type' => 'leave_day'
             ];
 
-            if ($date->isWeekend()) {
+            if ($date->dayOfWeek === 5 || $date->dayOfWeek === 6){
                 $weekends++;
                 $dayInfo['type'] = 'weekend';
             } elseif (in_array($date->format('Y-m-d'), $publicHolidayDates)) {

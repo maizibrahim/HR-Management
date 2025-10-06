@@ -3,8 +3,6 @@
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Employee\CountryController;
 use App\Http\Controllers\Employee\LeaveController;
-use App\Http\Controllers\Employee\SalaryController;
-use App\Http\Controllers\Employee\SupervisorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
@@ -54,13 +52,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/user/store/password', 'UpdatePassword')->name('update.password');
 
 });
-//Supervisor Route
-Route::controller(SupervisorController::class)->group(function () {
-    Route::get('/employee/supervisor/all', 'AllSupervisor')->name('supervisor.all');
-    Route::get('/employee/supervisor/new', 'AddSupervisor')->name('supervisor.add');
-    Route::post('/employee/supervisor/store', 'StoreSupervisor')->name('supervisor.store');
-    Route::get('/employee/supervisor/delete/{id}','DeleteSupervisor')->name('supervisor.delete');
-});
+
 
 //Permission All route
 Route::controller(RoleController::class)->group(function () {
@@ -140,16 +132,6 @@ Route::controller(EmployeeRegController::class)->group(function () {
    Route::get('/detail/employee/{id}','DetailEmployee')->name('employee.detail');
 });
 
-//Employee salary All route
-Route::controller(SalaryController::class)->group(function () {
-    Route::get('/all/employee/salary', 'AllSalary')->name('salary.all');
-    Route::get('/new/employee/salary', 'AddSalary')->name('salary.add');
-    Route::post('/store/employee/salary', 'StoreSalary')->name('salary.store');
-    Route::get('/edit/employee/salary/{id}', 'EditSalary')->name('salary.edit');
-    Route::post('/update/employee/salary/{id}', 'UpdateSalary')->name('salary.update');
-    Route::get('/delete/employee/salary/{id}','DeleteSalary')->name('salary.delete');
- });
-
 // User Management Routes
     Route::resource('users', EmployeeRegController::class);
     Route::get('/users/{user}/assign-supervisor', [EmployeeRegController::class, 'assignSupervisor'])->name('users.assign-supervisor');
@@ -163,15 +145,6 @@ Route::controller(SalaryController::class)->group(function () {
         return view('users.supervisor-management', compact('users'));
     })->name('supervisor-management');
 
-
-
-// Leave Groups Routes
-    Route::resource('leave-groups', LeaveGroupController::class);
-    Route::get('/leave-groups/delete/{id}', [LeaveGroupController::class, 'deleteleaveGroup'])->name('leave-groups.delete');
-
- // Leave Types Routes
-    Route::resource('leave-types', LeaveTypeController::class);
-    Route::get('/leave-types/delete/{id}', [LeaveTypeController::class, 'deleteleavetype'])->name('leave-types.delete');
 
 // Leave Requests
     Route::get('/leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
@@ -188,7 +161,7 @@ Route::controller(SalaryController::class)->group(function () {
             ->name('download-documentation');
 
 // AJAX route for calculating working days
-   // Route::post('/leave-requests/calculate-days', [LeaveRequestController::class, 'calculateDays'])->name('leave-requests.calculate-days');
+   //Route::post('/leave-requests/calculate-days', [LeaveRequestController::class, 'calculateDays'])->name('leave-requests.calculate-days');
 
  // Leave Approvals
     Route::get('/leave-approvals', [LeaveRequestController::class, 'approvalList'])->name('leave-requests.approval-list')->middleware('permission:leave-requests.approval-list');
@@ -205,10 +178,6 @@ Route::controller(SalaryController::class)->group(function () {
 Route::post('/users/{user}/sync-leave-balances', [UserLeaveController::class, 'syncUserLeaveBalances'])->name('users.sync-leave-balances');
 Route::post('/leave-groups/{leaveGroup}/sync-balances', [UserLeaveController::class, 'syncLeaveGroupBalances'])->name('leave-groups.sync-balances');
 
-// Public Holidays Management (Admin/HR)
-Route::resource('public-holidays', PublicHolidayController::class);
-Route::post('/public-holidays/bulk-import', [PublicHolidayController::class, 'bulkImport'])->name('public-holidays.bulk-import');
-Route::post('/public-holidays/generate-recurring', [PublicHolidayController::class, 'generateRecurring'])->name('public-holidays.generate-recurring');
 
 // AJAX endpoint for leave days calculation
 Route::post('/leave-requests/calculate-days', [LeaveRequestController::class, 'calculateDaysPreview'])->name('leave-requests.calculate-days');
@@ -229,22 +198,44 @@ Route::post('/leave-requests/bulk/import', [LeaveRequestController::class, 'bulk
 Route::get('/leave-requests/bulk/template', [LeaveRequestController::class, 'downloadTemplate'])->name('leave-requests.download-template');
 
 
+Route::get('/subordinate-leaves', [LeaveRequestController::class, 'subordinateLeaves'])
+    ->name('leave-requests.subordinate-leaves');
+
 
 
 // Add to routes/web.php
 Route::middleware(['auth'])->group(function () {
 
-// Daily Leave Records Routes (HR Access)
-    Route::prefix('hr')->name('hr.')->group(function () {
+    Route::prefix('leave')->name('leave.')->group(function () {
+        // Daily Leave Records Routes
         Route::get('/leave-records', [DailyLeaveRecordsController::class, 'index'])->name('leave-records.index');
         Route::get('/leave-records/export', [DailyLeaveRecordsController::class, 'export'])->name('leave-records.export');
         Route::get('leave-records/ajax', [DailyLeaveRecordsController::class, 'getRecordsForDate'])->name('leave-records.ajax');
         Route::get('/leave-records/{leaveRequest}', [DailyLeaveRecordsController::class, 'show'])->name('leave-records.show');
         Route::get('/monthly-leave-report', [DailyLeaveRecordsController::class, 'monthlyReport'])->name('monthly-leave-report');
+
+        // Leave Groups Routes
+        Route::resource('leave-groups', LeaveGroupController::class);
+        Route::get('/leave-groups/delete/{id}', [LeaveGroupController::class, 'deleteleaveGroup'])->name('leave-groups.delete');
+
+        // Leave Types Routes
+        Route::resource('leave-types', LeaveTypeController::class);
+        Route::get('/leave-types/delete/{id}', [LeaveTypeController::class, 'deleteleavetype'])->name('leave-types.delete');
+
+
+
+    });
+
+    Route::prefix('settings')->name('settings.')->group(function () {
+
+        // Public Holidays Management (Admin/HR)
+        Route::resource('public-holidays', PublicHolidayController::class);
+        Route::get('/public-holidays/delete/{id}', [PublicHolidayController::class, 'deletepublicholiday'])->name('public-holidays.delete');
+        Route::post('/public-holidays/bulk-import', [PublicHolidayController::class, 'bulkImport'])->name('public-holidays.bulk-import');
+        Route::post('/public-holidays/generate-recurring', [PublicHolidayController::class, 'generateRecurring'])->name('public-holidays.generate-recurring');
+
     });
 
 });
-
-
 
 require __DIR__.'/auth.php';

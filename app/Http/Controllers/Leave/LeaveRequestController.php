@@ -6,6 +6,7 @@ use App\Models\leave\LeaveRequest;
 use App\Models\leave\LeaveType;
 use App\Models\leave\LeaveBalance;
 use App\Models\PublicHoliday;
+use App\Services\LeaveDayCalculator;
 use App\Services\LeaveReportService;
 use App\Providers\LeaveReportServiceProvider;
 use Illuminate\Http\Request;
@@ -97,7 +98,13 @@ class LeaveRequestController extends Controller
         }
 
         // Calculate the number of days requested (excluding weekends and public holidays)
-        $daysRequested = $this->calculateLeaveDays($validated['start_date'], $validated['end_date']);
+        //$daysRequested = $this->calculateLeaveDays($validated['start_date'], $validated['end_date']);
+
+        // Calculate the number of days requested using the new calculator
+        $startDate = Carbon::parse($validated['start_date']);
+        $endDate = Carbon::parse($validated['end_date']);
+
+        $daysRequested = LeaveDayCalculator::calculateDays($startDate, $endDate, $leaveType);
 
         // Check if the user has enough leave balance
         $leaveBalance = LeaveBalance::where('user_id', $user->id)
@@ -721,6 +728,129 @@ class LeaveRequestController extends Controller
             'breakdown' => $breakdown
         ]);
     }
+
+//subcordinates
+
+public function subordinateLeaves(Request $request)
+{
+    $user = Auth::user();
+
+    // Get all subordinates
+    $subordinates = $user->subordinates;
+
+    // Build the query for leave requests
+    $query = LeaveRequest::whereHas('user', function ($q) use ($user) {
+        $q->where('supervisor_id', $user->id);
+    })->with(['user', 'leaveType']);
+
+    // Apply name filter if provided
+    $selectedEmployeeId = null;
+    if ($request->filled('employee_name')) {
+        $query->whereHas('user', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->employee_name . '%');
+        });
+    }
+
+    // Apply employee_id filter (for dropdown selection)
+    if ($request->filled('employee_id')) {
+        $selectedEmployeeId = $request->employee_id;
+        $query->where('user_id', $selectedEmployeeId);
+    }
+
+    // Apply status filter if provided
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // Apply date range filter if provided
+    if ($request->filled('start_date')) {
+        $query->where('start_date', '>=', $request->start_date);
+    }
+
+    if ($request->filled('end_date')) {
+        $query->where('end_date', '<=', $request->end_date);
+    }
+
+    $leaveRequests = $query->latest()->paginate(15)->appends($request->all());
+
+    // Calculate summary statistics
+    $summary = [
+        'total_requests' => LeaveRequest::whereHas('user', function ($q) use ($user) {
+            $q->where('supervisor_id', $user->id);
+        })->count(),
+
+        'pending_requests' => LeaveRequest::whereHas('user', function ($q) use ($user) {
+            $q->where('supervisor_id', $user->id);
+        })->where('status', 'pending')->count(),
+
+        'approved_requests' => LeaveRequest::whereHas('user', function ($q) use ($user) {
+            $q->where('supervisor_id', $user->id);
+        })->where('status', 'approved')->count(),
+
+        'rejected_requests' => LeaveRequest::whereHas('user', function ($q) use ($user) {
+            $q->where('supervisor_id', $user->id);
+        })->where('status', 'rejected')->count(),
+
+        'total_days_approved' => LeaveRequest::whereHas('user', function ($q) use ($user) {
+            $q->where('supervisor_id', $user->id);
+        })->where('status', 'approved')->sum('days_requested'),
+
+        'upcoming_leaves' => LeaveRequest::whereHas('user', function ($q) use ($user) {
+            $q->where('supervisor_id', $user->id);
+        })->where('status', 'approved')
+          ->where('start_date', '>=', now())
+          ->count(),
+    ];
+
+    // Get leave type breakdown
+    $leaveTypeBreakdown = LeaveRequest::whereHas('user', function ($q) use ($user) {
+        $q->where('supervisor_id', $user->id);
+    })->where('status', 'approved')
+      ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
+      ->select('leave_types.leave_name', DB::raw('SUM(leave_requests.days_requested) as total_days'))
+      ->groupBy('leave_types.id', 'leave_types.leave_name')
+      ->get();
+
+    // Get selected employee details and leave summary
+    $selectedEmployee = null;
+    $employeeLeaveBalances = collect();
+    $employeeLeaveTypeSummary = collect();
+
+    if ($selectedEmployeeId) {
+        $selectedEmployee = User::with(['leaveGroup', 'leaveBalances.leaveType'])
+            ->findOrFail($selectedEmployeeId);
+
+        // Get leave balances
+        $employeeLeaveBalances = $selectedEmployee->leaveBalances;
+
+        // Get leave type summary for selected employee
+        $employeeLeaveTypeSummary = LeaveRequest::where('user_id', $selectedEmployeeId)
+            ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
+            ->select(
+                'leave_types.id',
+                'leave_types.leave_name',
+                DB::raw('SUM(CASE WHEN leave_requests.status = "approved" THEN leave_requests.days_requested ELSE 0 END) as approved_days'),
+                DB::raw('SUM(CASE WHEN leave_requests.status = "pending" THEN leave_requests.days_requested ELSE 0 END) as pending_days'),
+                DB::raw('SUM(CASE WHEN leave_requests.status = "rejected" THEN leave_requests.days_requested ELSE 0 END) as rejected_days'),
+                DB::raw('COUNT(CASE WHEN leave_requests.status = "approved" THEN 1 END) as approved_count'),
+                DB::raw('COUNT(CASE WHEN leave_requests.status = "pending" THEN 1 END) as pending_count'),
+                DB::raw('COUNT(CASE WHEN leave_requests.status = "rejected" THEN 1 END) as rejected_count')
+            )
+            ->groupBy('leave_types.id', 'leave_types.leave_name')
+            ->get();
+    }
+
+    return view('leave-requests.subordinate-leaves', compact(
+        'leaveRequests',
+        'subordinates',
+        'summary',
+        'leaveTypeBreakdown',
+        'selectedEmployee',
+        'employeeLeaveBalances',
+        'employeeLeaveTypeSummary',
+        'selectedEmployeeId'
+    ));
+}
 
 
 

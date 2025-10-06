@@ -63,7 +63,7 @@ class DailyLeaveRecordsController extends Controller
         // Calculate statistics for the selected date
         $statistics = $this->calculateDailyStatistics($selectedDate);
 
-        return view('hr.leave-records.index', compact(
+        return view('leave.leave-records.index', compact(
             'leaveRecords',
             'selectedDate',
             'employeeName',
@@ -214,7 +214,7 @@ class DailyLeaveRecordsController extends Controller
     {
         $leaveRequest->load(['user', 'leaveType', 'reviewer']);
 
-        return view('hr.leave-records.show', compact('leaveRequest'));
+        return view('leave.leave-records.show', compact('leaveRequest'));
     }
 
     /**
@@ -248,7 +248,7 @@ class DailyLeaveRecordsController extends Controller
             'leave_types_used' => $leaveRecords->pluck('leave_type_id')->unique()->count()
         ];
 
-        return view('hr.leave-records.monthly-report', compact(
+        return view('leave.leave-records.monthly-report', compact(
             'leaveRecords',
             'monthlyStats',
             'month',

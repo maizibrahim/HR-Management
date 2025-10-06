@@ -16,12 +16,16 @@ class LeaveType extends Model
         'leave_code',
         'leave_name',
         'days_allowed',
-        'requires_documentation'
+        'requires_documentation',
+        'count_type',
     ];
 
     protected $casts = [
         'requires_documentation' => 'boolean',
     ];
+
+     public const COUNT_TYPE_WEEKDAYS_ONLY = 'weekdays_only';
+    public const COUNT_TYPE_ALL_DAYS = 'all_days';
 
     public function leaveGroup(): BelongsTo
     {

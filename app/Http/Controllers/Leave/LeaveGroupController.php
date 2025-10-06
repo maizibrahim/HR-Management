@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\leave\LeaveGroup;
+use App\Models\leave\LeaveRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LeaveGroupController extends Controller
 {
@@ -15,7 +18,7 @@ class LeaveGroupController extends Controller
     public function index()
     {
         $leaveGroups = LeaveGroup::with('leaveTypes')->get();
-        return view('leave-groups.index', compact('leaveGroups'));
+        return view('leave.leave-groups.index', compact('leaveGroups'));
     }
 
     /**
@@ -23,7 +26,7 @@ class LeaveGroupController extends Controller
      */
     public function create()
     {
-        return view('leave-groups.create');
+        return view('leave.leave-groups.create');
     }
 
     /**
@@ -38,7 +41,7 @@ class LeaveGroupController extends Controller
 
         LeaveGroup::create($validated);
 
-        return redirect()->route('leave-groups.index')
+        return redirect()->route('leave.leave-groups.index')
             ->with('success', 'Leave group created successfully.');
     }
 
@@ -48,7 +51,7 @@ class LeaveGroupController extends Controller
     public function show(LeaveGroup $leaveGroup)
     {
         $leaveGroup->load(['leaveTypes', 'users']);
-        return view('leave-groups.show', compact('leaveGroup'));
+        return view('leave.leave-groups.show', compact('leaveGroup'));
     }
 
     /**
@@ -56,7 +59,7 @@ class LeaveGroupController extends Controller
      */
     public function edit(LeaveGroup $leaveGroup)
     {
-        return view('leave-groups.edit', compact('leaveGroup'));
+        return view('leave.leave-groups.edit', compact('leaveGroup'));
     }
 
     /**
@@ -76,7 +79,7 @@ class LeaveGroupController extends Controller
 
         $leaveGroup->update($validated);
 
-        return redirect()->route('leave-groups.index')
+        return redirect()->route('leave.leave-groups.index')
             ->with('success', 'Leave group updated successfully.');
     }
 
@@ -88,12 +91,15 @@ class LeaveGroupController extends Controller
     {
         LeaveGroup::findOrFail($id)->delete();
 
-          return redirect()->route('leave-groups.index')
+          return redirect()->route('leave.leave-groups.index')
             ->with('success', 'Leave group deleted successfully.');
 
 
 
     }
+
+
+
 
 
 }

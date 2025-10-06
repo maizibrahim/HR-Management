@@ -57,9 +57,20 @@
             </li>
             @endif
 
+            @if(Auth::user()->can('leave.subordinate-menu'))
+            <li>
+                <a href="{{route ('leave-requests.subordinate-leaves')}}">
+                    <div class="parent-icon"><i class='bx bxs-user-circle'></i>
+                    </div>
+                    <div class="menu-title">Subordinates</div>
+                </a>
+            </li>
+            @endif
+
+
             @if(Auth::user()->can('leave.records-menu'))
             <li>
-                <a href="{{route ('hr.leave-records.index')}}">
+                <a href="{{route ('leave.leave-records.index')}}">
                     <div class="parent-icon"><i class='bx bxs-ambulance'></i>
                     </div>
                     <div class="menu-title">Leave Records</div>
@@ -95,16 +106,16 @@
                 </a>
                 <ul>
                     @if(Auth::user()->can('leave.group-menu'))
-                     <li> <a href="{{route('leave-groups.index')}}"><i class='bx bx-radio-circle'></i>Leave Group</a></li>
+                     <li> <a href="{{route('leave.leave-groups.index')}}"><i class='bx bx-radio-circle'></i>Leave Group</a></li>
                     @endif
                      @if(Auth::user()->can('leave.types-menu'))
-                    <li> <a href="{{route('leave-types.index')}}"><i class='bx bx-radio-circle'></i>Leave Type</a></li>
+                    <li> <a href="{{route('leave.leave-types.index')}}"><i class='bx bx-radio-circle'></i>Leave Type</a></li>
                     @endif
                 </ul>
             </li>
              @if(Auth::user()->can('public.holiday-menu'))
             <li>
-                <a href="{{ route('public-holidays.index') }}">
+                <a href="{{ route('settings.public-holidays.index') }}">
                     <div class="parent-icon"><i class='lni lni-island'></i>
                     </div>
                     <div class="menu-title">Public Holiday</div>

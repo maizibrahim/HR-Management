@@ -23,7 +23,7 @@ class LeaveTypeController extends Controller
     public function index()
     {
        $leaveTypes = LeaveType::with('leaveGroup')->get();
-        return view('leave-types.index', compact('leaveTypes'));
+        return view('leave.leave-types.index', compact('leaveTypes'));
     }
 
     /**
@@ -32,7 +32,7 @@ class LeaveTypeController extends Controller
     public function create()
     {
        $leaveGroups = LeaveGroup::all();
-        return view('leave-types.create', compact('leaveGroups'));
+        return view('leave.leave-types.create', compact('leaveGroups'));
     }
 
     /**
@@ -53,6 +53,8 @@ class LeaveTypeController extends Controller
             ],
             'days_allowed' => 'required|integer|min:1',
             'requires_documentation' => 'boolean',
+             'count_type' => 'required|in:weekdays_only,all_days', // Add this
+
             ]);
 
             DB::beginTransaction();
@@ -67,7 +69,7 @@ class LeaveTypeController extends Controller
 
             DB::commit();
 
-        return redirect()->route('leave-types.index')
+        return redirect()->route('leave.leave-types.index')
             ->with('success', 'Leave type created successfully.');
 
         }    catch (\Exception $e) {
@@ -86,7 +88,7 @@ class LeaveTypeController extends Controller
     {
 
         $leaveType->load(['leaveGroup', 'leaveRequests.user', 'leaveBalances.user']);
-    return view('leave-types.show', compact('leaveType'));
+    return view('leave.leave-types.show', compact('leaveType'));
     }
 
     /**
@@ -95,7 +97,7 @@ class LeaveTypeController extends Controller
     public function edit(LeaveType $leaveType)
     {
         $leaveGroups = LeaveGroup::all();
-        return view('leave-types.edit', compact('leaveType', 'leaveGroups'));
+        return view('leave.leave-types.edit', compact('leaveType', 'leaveGroups'));
     }
 
     /**
@@ -116,6 +118,8 @@ class LeaveTypeController extends Controller
             ],
             'days_allowed' => 'required|integer|min:1',
             'requires_documentation' => 'boolean',
+            'count_type' => 'required|in:weekdays_only,all_days', // Add this
+
         ]);
 
         DB::beginTransaction();
@@ -142,7 +146,7 @@ class LeaveTypeController extends Controller
 
             DB::commit();
 
-            return redirect()->route('leave-types.index')
+            return redirect()->route('leave.leave-types.index')
                 ->with('success', 'Leave type updated successfully.');
 
         } catch (\Exception $e) {

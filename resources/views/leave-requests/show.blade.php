@@ -27,6 +27,15 @@
                                 <td>
                                     <span class="badge bg-info">{{ $leaveRequest->leaveType->leave_name }}</span>
                                 </td>
+                                <td><strong>Day Counting Method:</strong></td>
+                                <td>
+                                     @if($leaveRequest->leaveType->count_type === 'all_days')
+                                    <span class="badge bg-info">All Days (Inc. Weekends)</span>
+                                @else
+                                    <span class="badge bg-secondary">Weekdays Only</span>
+                                @endif
+                                </td>
+
                             </tr>
                             <tr>
                                 <td><strong>Start Date:</strong></td>

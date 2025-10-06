@@ -32,6 +32,7 @@
                                     <th>Days</th>
                                     <th>Status</th>
                                     <th>Documentation</th>
+                              <th>Count Type</th>
                                     <th>Submitted</th>
                                     <th>Actions</th>
                                 </tr>
@@ -91,6 +92,13 @@
                                             @endif
                                         @endif
                                     </td>
+                                     <td>
+                                            @if($request->leaveType->count_type === 'all_days')
+                                                <span class="badge bg-info">All Days</span>
+                                            @else
+                                                <span class="badge bg-secondary">Weekdays</span>
+                                            @endif
+                                        </td>
                                     <td>
                                         <small class="text-muted">
                                             {{ $request->created_at->format('M d, Y') }}<br>

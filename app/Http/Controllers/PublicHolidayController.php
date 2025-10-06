@@ -30,12 +30,12 @@ class PublicHolidayController extends Controller
 
         $availableYears = $availableYears->sort()->values();
 
-        return view('public-holidays.index', compact('holidays', 'year', 'availableYears'));
+        return view('settings.public-holidays.index', compact('holidays', 'year', 'availableYears'));
     }
 
     public function create()
     {
-        return view('public-holidays.create');
+        return view('settings.public-holidays.create');
     }
 
     public function store(Request $request)
@@ -51,13 +51,13 @@ class PublicHolidayController extends Controller
 
         PublicHoliday::create($validated);
 
-        return redirect()->route('public-holidays.index')
+        return redirect()->route('settings.public-holidays.index')
             ->with('success', 'Public holiday created successfully.');
     }
 
     public function edit(PublicHoliday $publicHoliday)
     {
-        return view('public-holidays.edit', compact('publicHoliday'));
+        return view('settings.public-holidays.edit', compact('publicHoliday'));
     }
 
     public function update(Request $request, PublicHoliday $publicHoliday)
@@ -77,7 +77,7 @@ class PublicHolidayController extends Controller
 
         $publicHoliday->update($validated);
 
-        return redirect()->route('public-holidays.index')
+        return redirect()->route('settings.public-holidays.index')
             ->with('success', 'Public holiday updated successfully.');
     }
 
@@ -85,9 +85,22 @@ class PublicHolidayController extends Controller
     {
         $publicHoliday->delete();
 
-        return redirect()->route('public-holidays.index')
+        return redirect()->route('settings.public-holidays.index')
             ->with('success', 'Public holiday deleted successfully.');
     }
+
+
+      public function deletepublicholiday($id)
+        {
+            try {
+                PublicHoliday::findOrFail($id)->delete();
+                return redirect()->back()
+                    ->with('success', 'Public Holiday deleted successfully!');
+            } catch (\Exception $e) {
+                return redirect()->back()
+                    ->with('error', 'Failed to delete public holiday. It may be in use.');
+            }
+        }
 
     public function bulkImport(Request $request)
     {
@@ -116,7 +129,7 @@ class PublicHolidayController extends Controller
             }
         }
 
-        return redirect()->route('public-holidays.index')
+        return redirect()->route('settings.public-holidays.index')
             ->with('success', "Imported {$imported} holidays. Skipped {$skipped} existing holidays.");
     }
 
@@ -128,7 +141,7 @@ class PublicHolidayController extends Controller
 
         PublicHoliday::createRecurringHolidays($validated['target_year']);
 
-        return redirect()->route('public-holidays.index', ['year' => $validated['target_year']])
+        return redirect()->route('settings.public-holidays.index', ['year' => $validated['target_year']])
             ->with('success', 'Recurring holidays generated for ' . $validated['target_year']);
     }
 }

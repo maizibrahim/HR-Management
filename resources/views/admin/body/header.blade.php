@@ -2,11 +2,10 @@
 
 <!--start header -->
 <header>
-    <div class="topbar d-flex align-items-center">
+         <div class="topbar d-flex align-items-center">
         <nav class="navbar navbar-expand gap-3">
             <div class="mobile-toggle-menu"><i class='bx bx-menu'></i>
             </div>
-
 
 
             <div class="top-menu ms-auto">
@@ -22,11 +21,26 @@
                     <li class="nav-item dropdown dropdown-large">
                         <div class="dropdown-menu dropdown-menu-end">
                             <div class="header-message-list">
+
                             </div>
                         </div>
                     </li>
                 </ul>
+
+
             </div>
+
+            <div class="position-relative search-bar d-lg-block d-none" data-bs-toggle="modal" data-bs-target="#SearchModal">
+						<input class="form-control px-5" disabled type="search" placeholder="Search">
+						<span class="position-absolute top-50 search-show ms-3 translate-middle-y start-0 top-50 fs-5"><i class='bx bx-search'></i></span>
+
+
+
+                    </div>
+
+
+
+
 
             @php
                 $id = Auth::user()->id;
